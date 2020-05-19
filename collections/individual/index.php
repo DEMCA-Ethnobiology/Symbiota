@@ -4,6 +4,11 @@ include_once($SERVER_ROOT.'/classes/OccurrenceIndividualManager.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverCore.php');
 include_once($SERVER_ROOT.'/classes/RdfUtility.php');
 
+if($ETHNO_ACTIVE){
+    include_once($SERVER_ROOT.'/classes/EthnoDataManager.php');
+    include_once($SERVER_ROOT.'/classes/EthnoMediaManager.php');
+}
+
 $occid = array_key_exists("occid",$_REQUEST)?trim($_REQUEST["occid"]):0;
 $collid = array_key_exists("collid",$_REQUEST)?trim($_REQUEST["collid"]):0;
 $pk = array_key_exists("pk",$_REQUEST)?trim($_REQUEST["pk"]):"";
@@ -151,6 +156,24 @@ if($displayLocality && is_numeric($occArr['decimallatitude']) && is_numeric($occ
 $dupClusterArr = $indManager->getDuplicateArr();
 $commentArr = $indManager->getCommentArr($isEditor);
 
+if($ETHNO_ACTIVE){
+    $ethnoDataManager = new EthnoDataManager();
+    $ethnoMediaManager = new EthnoMediaManager();
+    $ethnoDataManager->setCollid($collid);
+    $ethnoDataManager->setOccId($occid);
+    $ethnoMediaManager->setCollid($collid);
+    $ethnoDataArr = $ethnoDataManager->getOccDataArr();
+    $eafArr = $ethnoMediaManager->getOccEAFArr($occid);
+    $linkageArr = $ethnoDataManager->getOccLinkageArr();
+    if($ethnoDataArr){
+        $ethnoDataManager->setOccTaxonomy();
+        $ethnoUseKingdomId = $ethnoDataManager->getKingdomId();
+        $ethnoPersonnelArr = $ethnoDataManager->getPersonnelArr();
+        $ethnoNameSemanticTagArr = $ethnoDataManager->getNameSemanticTagArr();
+        $ethnoUsePartsUsedTagArr = $ethnoDataManager->getPartsUsedTagArr($ethnoUseKingdomId);
+        $ethnoUseUseTagArr = $ethnoDataManager->getUseTagArr($ethnoUseKingdomId);
+    }
+}
 header("Content-Type: text/html; charset=".$CHARSET);
 ?>
 <html>
@@ -306,6 +329,23 @@ header("Content-Type: text/html; charset=".$CHARSET);
 					<li id="indCommentsTab"><a href="#commenttab"><span><?php echo ($commentArr?count($commentArr).' ':''); ?>Comments</span></a></li>
 					<li id="indLinkedResourcesTab"><a href="linkedresources.php?occid=<?php echo $occid.'&tid='.$occArr['tidinterpreted'].'&clid='.$clid.'&collid='.$collid; ?>"><span>Linked Resources</span></a></li>
 					<?php
+          if($ETHNO_ACTIVE){
+            if($ethnoDataArr){
+                ?>
+                <li><a href="#ethnodatatab"><span>Vernacular Data</span></a></li>
+                <?php
+            }
+            if($eafArr){
+                ?>
+                <li><a href="#ethnomediatab"><span>Multimedia</span></a></li>
+                <?php
+            }
+            if($linkageArr){
+                ?>
+                <li><a href="#ethnolinkagetab"><span>Linkages</span></a></li>
+                <?php
+            }
+          }
 					if($isEditor){
 						?>
 						<li><a href="#edittab"><span>Edit History</span></a></li>
@@ -990,6 +1030,17 @@ header("Content-Type: text/html; charset=".$CHARSET);
 					</div>
 					<?php
 				}
+        if($ETHNO_ACTIVE){
+          if($ethnoDataArr){
+              include_once($SERVER_ROOT.'/ethno/includes/individual/indethnodatatab.php');
+          }
+          if($eafArr){
+              include_once($SERVER_ROOT.'/ethno/includes/individual/indethnomediatab.php');
+          }
+          if($linkageArr){
+              include_once($SERVER_ROOT.'/ethno/includes/individual/indethnolinkagetab.php');
+          }
+        }
 				?>
 				<div id="commenttab">
 					<?php

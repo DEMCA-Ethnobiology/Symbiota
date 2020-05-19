@@ -192,7 +192,7 @@ if($editable && $action){
 				?>
 				<div id="tabs" style="margin:10px;">
 					<ul>
-						<li><a href="#commontab"><span>Synonyms / Vernaculars</span></a></li>
+						<li><a href="#commontab"><span><?php echo ($ETHNO_ACTIVE?'Synonyms':'Synonyms / Vernaculars'); ?></span></a></li>
 				        <li><a href="tpimageeditor.php?tid=<?php echo $tEditor->getTid().'&lang='.$lang; ?>"><span>Images</span></a></li>
 				        <li><a href="tpimageeditor.php?tid=<?php echo $tEditor->getTid().'&lang='.$lang.'&cat=imagequicksort'; ?>"><span>Image Sort</span></a></li>
 				        <li><a href="tpimageeditor.php?tid=<?php echo $tEditor->getTid().'&lang='.$lang.'&cat=imageadd'; ?>"><span>Add Image</span></a></li>
@@ -200,111 +200,114 @@ if($editable && $action){
 				    </ul>
 					<div id="commontab">
 						<?php
-						//Display Common Names (vernaculars)
-						$vernList = $tEditor->getVernaculars();
-						?>
-						<div>
-							<div style="margin:10px 0px">
-								<b><?php echo ($vernList?'Common Names':'No common in system'); ?></b> 
-								<span onclick="toggle('addvern');" title="Add a New Common Name">
+                        if(!$ETHNO_ACTIVE){
+                            $vernList = $tEditor->getVernaculars();
+                            ?>
+                            <div>
+                                <div style="margin:10px 0px">
+                                    <b><?php echo ($vernList?'Common Names':'No common in system'); ?></b>
+                                    <span onclick="toggle('addvern');" title="Add a New Common Name">
 									<img style="border:0px;width:15px;" src="../../images/add.png"/>
 								</span>
-							</div>
-							<div id="addvern" class="addvern" style="display:<?php echo ($vernList?'none':'block'); ?>;">
-								<form name="addvernform" action="tpeditor.php" method="post" >
-									<fieldset style="width:250px;margin:5px 0px 0px 20px;">
-										<legend><b>New Common Name</b></legend>
-										<div>
-											Common Name: 
-											<input name="vern" style="margin-top:5px;border:inset;" type="text" />
-										</div>
-					    				<div>
-					    					Language: 
-					    					<input name="language" style="margin-top:5px;border:inset;" type="text" />
-					    				</div>
-										<div>
-											Notes: 
-											<input name="notes" style="margin-top:5px;border:inset;" type="text" />
-										</div>
-										<div>
-											Source: 
-											<input name="source" style="margin-top:5px;border:inset;" type="text" />
-										</div>
-										<div>
-											Sort Sequence: 
-											<input name="sortsequence" style="margin-top:5px;border:inset;width:40px" type="text" />
-										</div>
-										<div>
-											<input type="hidden" name="tid" value="<?php echo $tEditor->getTid(); ?>" />
-											<input id="vernsadd" name="action" style="margin-top:5px;" type="submit" value="Add Common Name" />
-										</div>
-									</fieldset>
-								</form>
-							</div>
-							<?php 
-							foreach($vernList as $lang => $vernsList){
-								?>
-								<div style="width:250px;margin:5px 0px 0px 15px;">
-									<fieldset>
-						    			<legend><b><?php echo $lang; ?></b></legend>
-						    			<?php 
-										foreach($vernsList as $vernArr){
-											?>
-											<div style="margin-left:10px;">
-												<b><?php echo $vernArr["vernacularname"]; ?></b>
-												<span onclick="toggle('vid-<?php echo $vernArr["vid"]; ?>');" title="Edit Common Name">
+                                </div>
+                                <div id="addvern" class="addvern" style="display:<?php echo ($vernList?'none':'block'); ?>;">
+                                    <form name="addvernform" action="tpeditor.php" method="post" >
+                                        <fieldset style="width:250px;margin:5px 0px 0px 20px;">
+                                            <legend><b>New Common Name</b></legend>
+                                            <div>
+                                                Common Name:
+                                                <input name="vern" style="margin-top:5px;border:inset;" type="text" />
+                                            </div>
+                                            <div>
+                                                Language:
+                                                <input name="language" style="margin-top:5px;border:inset;" type="text" />
+                                            </div>
+                                            <div>
+                                                Notes:
+                                                <input name="notes" style="margin-top:5px;border:inset;" type="text" />
+                                            </div>
+                                            <div>
+                                                Source:
+                                                <input name="source" style="margin-top:5px;border:inset;" type="text" />
+                                            </div>
+                                            <div>
+                                                Sort Sequence:
+                                                <input name="sortsequence" style="margin-top:5px;border:inset;width:40px" type="text" />
+                                            </div>
+                                            <div>
+                                                <input type="hidden" name="tid" value="<?php echo $tEditor->getTid(); ?>" />
+                                                <input id="vernsadd" name="action" style="margin-top:5px;" type="submit" value="Add Common Name" />
+                                            </div>
+                                        </fieldset>
+                                    </form>
+                                </div>
+                                <?php
+                                foreach($vernList as $lang => $vernsList){
+                                    ?>
+                                    <div style="width:250px;margin:5px 0px 0px 15px;">
+                                        <fieldset>
+                                            <legend><b><?php echo $lang; ?></b></legend>
+                                            <?php
+                                            foreach($vernsList as $vernArr){
+                                                ?>
+                                                <div style="margin-left:10px;">
+                                                    <b><?php echo $vernArr["vernacularname"]; ?></b>
+                                                    <span onclick="toggle('vid-<?php echo $vernArr["vid"]; ?>');" title="Edit Common Name">
 													<img style="border:0px;width:12px;" src="../../images/edit.png" />
 												</span>
-											</div>
-											<form name="updatevern" action="tpeditor.php" method="post" style="margin-left:20px;">
-												<div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;'>
-													<input id='vernacularname' name='vernacularname' style='margin:2px 0px 5px 15px;border:inset;' type='text' value='<?php echo $vernArr["vernacularname"]; ?>' />
-												</div>
-												<div>
-													Language: <?php echo $vernArr["language"]; ?>
-												</div>
-												<div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;'>
-													<input id='language' name='language' style='margin:2px 0px 5px 15px;border:inset;' type='text' value='<?php echo $vernArr["language"]; ?>' />
-												</div>
-												<div>
-													Notes: <?php echo $vernArr["notes"]; ?>
-												</div>
-												<div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;'>
-													<input id='notes' name='notes' style='margin:2px 0px 5px 15px;border:inset;' type='text' value='<?php echo $vernArr["notes"];?>' />
-												</div>
-												<div style=''>Source: <?php echo $vernArr["source"]; ?></div>
-												<div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;'>
-													<input id='source' name='source' style='margin:2px 0px 5px 15px;border:inset;' type='text' value='<?php echo $vernArr["source"]; ?>' />
-												</div>
-												<div style=''>Sort Sequence: <?php echo $vernArr["sortsequence"];?></div>
-												<div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;'>
-													<input id='sortsequence' name='sortsequence' style='margin:2px 0px 5px 15px;border:inset;width:40px;' type='text' value='<?php echo $vernArr["sortsequence"]; ?>' />
-												</div>
-												<input type='hidden' name='vid' value='<?php echo $vernArr["vid"]; ?>' />
-												<input type='hidden' name='tid' value='<?php echo $tEditor->getTid();?>' />
-												<div class='vid-<?php echo $vernArr["vid"];?>' style='display:none;'>
-													<input id='vernssubmit' name='action' type='submit' value='Submit Common Name Edits' />
-												</div>
-											</form>
-											<div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;margin:15px;'>
-												<form id='delvern' name='delvern' action='tpeditor.php' method='post' onsubmit="return window.confirm('Are you sure you want to delete this Common Name?')">
-													<input type='hidden' name='delvern' value='<?php echo $vernArr["vid"]; ?>' />
-													<input type='hidden' name='tid' value='<?php echo $tEditor->getTid(); ?>' />
-													<input name='action' type='hidden' value='Delete Common Name' /> 
-													<input name='submitaction' type='image' value='Delete Common Name' style='height:12px;' src='../../images/del.png' /> 
-													Delete Common Name
-												</form>
-											</div>
-											<?php 
-										}
-										?>
-									</fieldset>
-								</div>
-								<?php 
-							}
-							?>
-						</div>
-						<div style="margin:30px 0px"><hr/></div>
+                                                </div>
+                                                <form name="updatevern" action="tpeditor.php" method="post" style="margin-left:20px;">
+                                                    <div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;'>
+                                                        <input id='vernacularname' name='vernacularname' style='margin:2px 0px 5px 15px;border:inset;' type='text' value='<?php echo $vernArr["vernacularname"]; ?>' />
+                                                    </div>
+                                                    <div>
+                                                        Language: <?php echo $vernArr["language"]; ?>
+                                                    </div>
+                                                    <div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;'>
+                                                        <input id='language' name='language' style='margin:2px 0px 5px 15px;border:inset;' type='text' value='<?php echo $vernArr["language"]; ?>' />
+                                                    </div>
+                                                    <div>
+                                                        Notes: <?php echo $vernArr["notes"]; ?>
+                                                    </div>
+                                                    <div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;'>
+                                                        <input id='notes' name='notes' style='margin:2px 0px 5px 15px;border:inset;' type='text' value='<?php echo $vernArr["notes"];?>' />
+                                                    </div>
+                                                    <div style=''>Source: <?php echo $vernArr["source"]; ?></div>
+                                                    <div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;'>
+                                                        <input id='source' name='source' style='margin:2px 0px 5px 15px;border:inset;' type='text' value='<?php echo $vernArr["source"]; ?>' />
+                                                    </div>
+                                                    <div style=''>Sort Sequence: <?php echo $vernArr["sortsequence"];?></div>
+                                                    <div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;'>
+                                                        <input id='sortsequence' name='sortsequence' style='margin:2px 0px 5px 15px;border:inset;width:40px;' type='text' value='<?php echo $vernArr["sortsequence"]; ?>' />
+                                                    </div>
+                                                    <input type='hidden' name='vid' value='<?php echo $vernArr["vid"]; ?>' />
+                                                    <input type='hidden' name='tid' value='<?php echo $tEditor->getTid();?>' />
+                                                    <div class='vid-<?php echo $vernArr["vid"];?>' style='display:none;'>
+                                                        <input id='vernssubmit' name='action' type='submit' value='Submit Common Name Edits' />
+                                                    </div>
+                                                </form>
+                                                <div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;margin:15px;'>
+                                                    <form id='delvern' name='delvern' action='tpeditor.php' method='post' onsubmit="return window.confirm('Are you sure you want to delete this Common Name?')">
+                                                        <input type='hidden' name='delvern' value='<?php echo $vernArr["vid"]; ?>' />
+                                                        <input type='hidden' name='tid' value='<?php echo $tEditor->getTid(); ?>' />
+                                                        <input name='action' type='hidden' value='Delete Common Name' />
+                                                        <input name='submitaction' type='image' value='Delete Common Name' style='height:12px;' src='../../images/del.png' />
+                                                        Delete Common Name
+                                                    </form>
+                                                </div>
+                                                <?php
+                                            }
+                                            ?>
+                                        </fieldset>
+                                    </div>
+                                    <?php
+                                }
+                                ?>
+                            </div>
+                            <div style="margin:30px 0px"><hr/></div>
+                            <?php
+                        }
+                        ?>
 						<fieldset style='padding:10px;margin:30px 0px;width:400px;'>
 					    	<legend><b>Synonyms</b></legend>
 							<?php 	

@@ -111,7 +111,7 @@ if($isEditor){
         $tabIndex = 2;
     }
 	elseif($action == "Delete Profile"){
-		if($pHandler->deleteProfile($userId, $isSelf)){
+		if($pHandler->deleteProfile()){
 			header("Location: ../index.php");
 		}
 		else{

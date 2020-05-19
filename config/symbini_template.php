@@ -35,7 +35,7 @@ $NLP_SALIX_ACTIVATED = 0;
 $OCCURRENCE_MOD_IS_ACTIVE = 1;
 $FLORA_MOD_IS_ACTIVE = 1;
 $KEY_MOD_IS_ACTIVE = 1;
-$ETHNOBIOLOGY_MOD_IS_ACTIVE = 0;
+$ETHNOBIOLOGY_MOD_IS_ACTIVE = 1;
 
 $REQUESTED_TRACKING_IS_ACTIVE = 0;   // Allow users to request actions such as requests for images to be made for specimens
 
@@ -97,38 +97,38 @@ $CSS_VERSION_LOCAL = '20170414';		//Changing this variable will force a refresh 
 //Crumb variables allow the customization of the bread crumbs. A crumb variable with an empty value will cause crumbs to disappear
 //Variable name should include path to file separated by underscores and then the file name ending with "Menu" or "Crumbs"
 //checklists/
-	$checklists_checklistMenu = 0;
-	//$checklists_checklistCrumbs = "<a href='../index.php'>Home</a> &gt;&gt; <a href='index.php'>Checklists</a> &gt;&gt; ";
+$checklists_checklistMenu = 0;
+//$checklists_checklistCrumbs = "<a href='../index.php'>Home</a> &gt;&gt; <a href='index.php'>Checklists</a> &gt;&gt; ";
 //collections/
-	$collections_indexMenu = 0;
-	$collections_harvestparamsMenu = 0;
-	//$collections_harvestparamsCrumbs = "<a href='index.php'>Collections</a> &gt;&gt; ";
-	$collections_listMenu = 0;
-	$collections_checklistMenu = 0;
-	$collections_download_downloadMenu = 0;
-	$collections_maps_indexMenu = 0;
+$collections_indexMenu = 0;
+$collections_harvestparamsMenu = 0;
+//$collections_harvestparamsCrumbs = "<a href='index.php'>Collections</a> &gt;&gt; ";
+$collections_listMenu = 0;
+$collections_checklistMenu = 0;
+$collections_download_downloadMenu = 0;
+$collections_maps_indexMenu = 0;
 
 //ident/
-	$ident_keyMenu = 0;
-	$ident_tools_chardeficitMenu = 0;
-	$ident_tools_massupdateMenu = 0;
-	$ident_tools_editorMenu = 0;
+$ident_keyMenu = 0;
+$ident_tools_chardeficitMenu = 0;
+$ident_tools_massupdateMenu = 0;
+$ident_tools_editorMenu = 0;
 
 //taxa/
-	$taxa_indexMenu = 0;
-	$taxa_admin_tpeditorMenu = 0;
+$taxa_indexMenu = 0;
+$taxa_admin_tpeditorMenu = 0;
 
 //glossary/
-	$glossary_indexBanner = 0;
+$glossary_indexBanner = 0;
 
 //loans/
-	$collections_loans_indexMenu = 0;
+$collections_loans_indexMenu = 0;
 
 //agents/
-    $agents_indexMenu = TRUE;
-    $agent_indexCrumbs = array();
-    array_push($agent_indexCrumbs,"<a href='$CLIENT_ROOT/index.php'>Home</a>");
-    array_push($agent_indexCrumbs,"<a href='$CLIENT_ROOT/agents/index.php'>Agents</a>");
+$agents_indexMenu = TRUE;
+$agent_indexCrumbs = array();
+array_push($agent_indexCrumbs,"<a href='$CLIENT_ROOT/index.php'>Home</a>");
+array_push($agent_indexCrumbs,"<a href='$CLIENT_ROOT/agents/index.php'>Agents</a>");
 
 //Base code shared by all pages; leave as is
 include_once("symbbase.php");

@@ -1,6 +1,7 @@
 <?php
 include_once('../config/symbini.php'); 
 include_once($SERVER_ROOT.'/classes/OccurrenceListManager.php');
+include_once($SERVER_ROOT.'/classes/EthnoSearchManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $targetTid = array_key_exists("targettid",$_REQUEST)?$_REQUEST["targettid"]:0;
@@ -15,6 +16,7 @@ $sortOrder = array_key_exists('sortorder',$_REQUEST)?$_REQUEST['sortorder']:'';
 if(!is_numeric($occIndex)) $occIndex = 0;
 
 $collManager = new OccurrenceListManager();
+$ethnoSearchManager = new EthnoSearchManager();
 $stArr = Array();
 $collArr = Array();
 $resetOccIndex = false;
@@ -32,8 +34,21 @@ if($stArrCollJson || $stArrSearchJson){
     if($collStArr && !$searchStArr) $stArr = $collStArr;
 }
 else{
-    if(isset($_REQUEST['taxa']) || isset($_REQUEST['country']) || isset($_REQUEST['state']) || isset($_REQUEST['county']) || isset($_REQUEST['local']) || isset($_REQUEST['elevlow']) || isset($_REQUEST['elevhigh']) || isset($_REQUEST['upperlat']) || isset($_REQUEST['pointlat']) || isset($_REQUEST['collector']) || isset($_REQUEST['collnum']) || isset($_REQUEST['eventdate1']) || isset($_REQUEST['eventdate2']) || isset($_REQUEST['catnum']) || isset($_REQUEST['typestatus']) || isset($_REQUEST['hasimages'])){
-        $stArr = $collManager->getSearchTerms();
+    if(isset($_REQUEST['taxa']) || isset($_REQUEST['country']) || isset($_REQUEST['state']) || isset($_REQUEST['county']) ||
+        isset($_REQUEST['local']) || isset($_REQUEST['elevlow']) || isset($_REQUEST['elevhigh']) || isset($_REQUEST['upperlat']) ||
+        isset($_REQUEST['pointlat']) || isset($_REQUEST['collector']) || isset($_REQUEST['collnum']) || isset($_REQUEST['eventdate1']) ||
+        isset($_REQUEST['eventdate2']) || isset($_REQUEST['catnum']) || isset($_REQUEST['typestatus']) || isset($_REQUEST['hasimages']) ||
+        isset($_REQUEST['semantics']) || isset($_REQUEST['verbatimVernacularName']) || isset($_REQUEST['annotatedVernacularName']) || isset($_REQUEST['verbatimLanguage']) ||
+        isset($_REQUEST['languageid']) || isset($_REQUEST['otherVerbatimVernacularName']) || isset($_REQUEST['otherLangId']) || isset($_REQUEST['verbatimParse']) ||
+        isset($_REQUEST['annotatedParse']) || isset($_REQUEST['verbatimGloss']) || isset($_REQUEST['annotatedGloss']) || isset($_REQUEST['freetranslation']) ||
+        isset($_REQUEST['taxonomicDescription']) || isset($_REQUEST['typology']) || isset($_REQUEST['parts']) || isset($_REQUEST['uses']) ||
+        isset($_REQUEST['consultantComments'])){
+        if(!$ETHNO_ACTIVE){
+            $stArr = $collManager->getSearchTerms();
+        }
+        else{
+            $stArr = $ethnoSearchManager->getSearchTermsArr();
+        }
         $stArrSearchJson = json_encode($stArr);
         $resetOccIndex = true;
     }

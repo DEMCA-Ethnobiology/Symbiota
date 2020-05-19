@@ -171,24 +171,26 @@ if($spprid) $specManager->setProjVariables($spprid);
 				var sfArr = [];
 				var tfArr = [];
 				for(var i=0;i<f.length;i++){
-					var obj = f.elements[i];
-					if(obj.name.indexOf("tf[") == 0){
-						if(tfArr.indexOf(obj.value) > -1){
-							alert("ERROR: Target field names must be unique (duplicate field: "+obj.value+")");
-							return false;
-						}
-						tfArr[tfArr.length] = obj.value;
-					}
-					if(obj.name.indexOf("sf[") == 0){
-						if(sfArr.indexOf(obj.value) > -1){
-							alert("ERROR: Source field names must be unique (duplicate field: "+obj.value+")");
-							return false;
-						}
-						sfArr[sfArr.length] = obj.value;
-					}
+					if(obj.value){
+                        var obj = f.elements[i];
+                        if(obj.name.indexOf("tf[") == 0){
+                            if(tfArr.indexOf(obj.value) > -1){
+                                alert("ERROR: Target field names must be unique (duplicate field: "+obj.value+")");
+                                return false;
+                            }
+                            tfArr[tfArr.length] = obj.value;
+                        }
+                        if(obj.name.indexOf("sf[") == 0){
+                            if(sfArr.indexOf(obj.value) > -1){
+                                alert("ERROR: Source field names must be unique (duplicate field: "+obj.value+")");
+                                return false;
+                            }
+                            sfArr[sfArr.length] = obj.value;
+                        }
+                    }
 				}
-				if(tfArr.indexOf("catalognumber") < 0 || tfArr.indexOf("originalurl") < 0){
-					alert("Catalog Number and Large Image URL must both be mapped to an incoming field");
+				if(((tfArr.indexOf("catalognumber") < 0) || (tfArr.indexOf("collectionnumber") < 0)) || tfArr.indexOf("originalurl") < 0){
+					alert("Either a Catalog Number or Collection Number, and a Large Image URL must be mapped to incoming fields");
 					return false;
 				}
 				return true;

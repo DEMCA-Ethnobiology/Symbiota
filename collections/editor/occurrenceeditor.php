@@ -630,6 +630,14 @@ else{
 												<a href="includes/imagetab.php?<?php echo $anchorVars; ?>"
 													style="">Images</a>
 											</li>
+                                            <?php
+                                            if($ETHNO_ACTIVE){
+                                                ?>
+                                                <li><a href="#ethnoDataDiv">Vernacular Data</a></li>
+                                                <li><a href="#ethnoMediaDiv">Multimedia</a></li>
+                                                <?php
+                                            }
+                                            ?>
 											<li id="resourceTab">
 												<a href="includes/resourcetab.php?<?php echo $anchorVars; ?>"
 													style="">Linked Resources</a>
@@ -1466,6 +1474,12 @@ else{
 										<div style="clear:both;">&nbsp;</div>
 									</form>
 								</div>
+                                <?php
+                                if($occId && $isEditor && $ETHNO_ACTIVE){
+                                    include_once($SERVER_ROOT.'/ethno/includes/editor/occethnodatatab.php');
+                                    include_once($SERVER_ROOT.'/ethno/includes/editor/occethnomediatab.php');
+                                }
+                                ?>
 							</div>
 						</td>
 						<td id="imgtd" style="display:none;width:430px;" valign="top">

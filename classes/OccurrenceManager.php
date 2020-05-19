@@ -474,6 +474,14 @@ class OccurrenceManager{
             $sqlWhere .= "AND (o.occid IN(SELECT occid FROM omoccurgenetic)) ";
             $this->localSearchArr[] = 'has genetic data';
         }
+        if(array_key_exists("hasethno",$this->searchTermsArr)){
+            $sqlWhere .= "AND (o.occid IN(SELECT occid FROM ethnodata)) ";
+            $this->localSearchArr[] = 'has ethnobiological data';
+        }
+        if(array_key_exists("hasmultimedia",$this->searchTermsArr)){
+            $sqlWhere .= "AND (o.occid IN(SELECT occid FROM ethnomedocclink)) ";
+            $this->localSearchArr[] = 'has multimedia files';
+        }
 		if(array_key_exists("targetclid",$this->searchTermsArr)){
 			$clid = $this->searchTermsArr["targetclid"];
 			if(is_numeric($clid)){
@@ -1233,6 +1241,28 @@ class OccurrenceManager{
             }
             else{
                 unset($this->searchTermsArr["hasgenetic"]);
+            }
+            $searchFieldsActivated = true;
+        }
+        if(array_key_exists("hasethno",$_REQUEST)){
+            $hasethno = $_REQUEST["hasethno"];
+            if($hasethno){
+                $searchArr[] = "hasethno:".$hasethno;
+                $this->searchTermsArr["hasethno"] = true;
+            }
+            else{
+                unset($this->searchTermsArr["hasethno"]);
+            }
+            $searchFieldsActivated = true;
+        }
+        if(array_key_exists("hasmultimedia",$_REQUEST)){
+            $hasmultimedia = $_REQUEST["hasmultimedia"];
+            if($hasmultimedia){
+                $searchArr[] = "hasmultimedia:".$hasmultimedia;
+                $this->searchTermsArr["hasmultimedia"] = true;
+            }
+            else{
+                unset($this->searchTermsArr["hasmultimedia"]);
             }
             $searchFieldsActivated = true;
         }

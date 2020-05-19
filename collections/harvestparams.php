@@ -2,6 +2,8 @@
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/config/includes/searchVarDefault.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceManager.php');
+include_once($SERVER_ROOT.'/classes/EthnoDataManager.php');
+include_once($SERVER_ROOT.'/classes/EthnoSearchManager.php');
 header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -11,13 +13,29 @@ if(file_exists($SERVER_ROOT.'/config/includes/searchVarCustom.php')){
 }
 
 $collManager = new OccurrenceManager();
+$ethnoDataManager = new EthnoDataManager();
+$ethnoSearchManager = new EthnoSearchManager();
+
 $collArr = Array();
 $stArr = Array();
 $stArrCollJson = '';
 $stArrSearchJson = '';
 
-if(isset($_REQUEST['taxa']) || isset($_REQUEST['country']) || isset($_REQUEST['state']) || isset($_REQUEST['county']) || isset($_REQUEST['local']) || isset($_REQUEST['elevlow']) || isset($_REQUEST['elevhigh']) || isset($_REQUEST['upperlat']) || isset($_REQUEST['pointlat']) || isset($_REQUEST['collector']) || isset($_REQUEST['collnum']) || isset($_REQUEST['eventdate1']) || isset($_REQUEST['eventdate2']) || isset($_REQUEST['catnum']) || isset($_REQUEST['typestatus']) || isset($_REQUEST['hasimages'])){
-    $stArr = $collManager->getSearchTerms();
+if(isset($_REQUEST['taxa']) || isset($_REQUEST['country']) || isset($_REQUEST['state']) || isset($_REQUEST['county']) ||
+    isset($_REQUEST['local']) || isset($_REQUEST['elevlow']) || isset($_REQUEST['elevhigh']) || isset($_REQUEST['upperlat']) ||
+    isset($_REQUEST['pointlat']) || isset($_REQUEST['collector']) || isset($_REQUEST['collnum']) || isset($_REQUEST['eventdate1']) ||
+    isset($_REQUEST['eventdate2']) || isset($_REQUEST['catnum']) || isset($_REQUEST['typestatus']) || isset($_REQUEST['hasimages']) ||
+    isset($_REQUEST['semantics']) || isset($_REQUEST['verbatimVernacularName']) || isset($_REQUEST['annotatedVernacularName']) || isset($_REQUEST['verbatimLanguage']) ||
+    isset($_REQUEST['languageid']) || isset($_REQUEST['otherVerbatimVernacularName']) || isset($_REQUEST['otherLangId']) || isset($_REQUEST['verbatimParse']) ||
+    isset($_REQUEST['annotatedParse']) || isset($_REQUEST['verbatimGloss']) || isset($_REQUEST['annotatedGloss']) || isset($_REQUEST['freetranslation']) ||
+    isset($_REQUEST['taxonomicDescription']) || isset($_REQUEST['typology']) || isset($_REQUEST['parts']) || isset($_REQUEST['uses']) ||
+    isset($_REQUEST['consultantComments'])){
+    if(!$ETHNO_ACTIVE){
+        $stArr = $collManager->getSearchTerms();
+    }
+    else{
+        $stArr = $ethnoSearchManager->getSearchTermsArr();
+    }
     $stArrSearchJson = json_encode($stArr);
 }
 
@@ -27,8 +45,13 @@ if(isset($_REQUEST['db'])){
         $stArrCollJson = json_encode($collArr);
     }
 }
+if($ETHNO_ACTIVE){
+    $langArr = $ethnoDataManager->getLangNameSearchDropDownList();
+    $ethnoNameSemanticTagArr = $ethnoDataManager->getNameSemanticTagArr();
+    $ethnoUsePartsUsedTagArr = $ethnoDataManager->getPartsUsedTagArrFull();
+    $ethnoUseUseTagArr = $ethnoSearchManager->getUseTagArrFull();
+}
 ?>
-
 <html>
 <head>
     <title><?php echo $defaultTitle.' '.$SEARCHTEXT['PAGE_TITLE']; ?></title>
@@ -37,14 +60,14 @@ if(isset($_REQUEST['db'])){
 	<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-    <script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=9"></script>
+    <script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=12"></script>
     <script type="text/javascript">
         var starrJson = '';
 
         $(document).ready(function() {
             <?php
             if($stArrCollJson){
-                echo "sessionStorage.jsoncollstarr = '".$stArrCollJson."';\n";
+                echo "sessionStorage.jsoncollstarr = '".$stArrCollJson."';";
             }
 
             if($stArrSearchJson){
@@ -65,6 +88,172 @@ if(isset($_REQUEST['db'])){
             ?>
         });
 
+        function selectAll(f){
+            var dbElements = document.getElementsByName("occid[]");
+            for(i = 0; i < dbElements.length; i++){
+                dbElements[i].checked = boxesChecked;
+            }
+
+        }
+
+        function setHarvestParamsForm(){
+            var stArr = JSON.parse(starrJson);
+            if(!stArr['usethes']){document.harvestparams.thes.checked = false;}
+            if(stArr['taxontype']){document.harvestparams.type.value = stArr['taxontype'];}
+            if(stArr['taxa']){document.harvestparams.taxa.value = stArr['taxa'];}
+            if(stArr['country']){
+                countryStr = stArr['country'];
+                countryArr = countryStr.split(";");
+                if(countryArr.indexOf('USA') > -1 || countryArr.indexOf('usa') > -1) countryStr = countryArr[0];
+                //if(countryStr.indexOf('United States') > -1) countryStr = 'United States';
+                document.harvestparams.country.value = countryStr;
+            }
+            if(stArr['state']){document.harvestparams.state.value = stArr['state'];}
+            if(stArr['county']){document.harvestparams.county.value = stArr['county'];}
+            if(stArr['local']){document.harvestparams.local.value = stArr['local'];}
+            if(stArr['elevlow']){document.harvestparams.elevlow.value = stArr['elevlow'];}
+            if(stArr['elevhigh']){document.harvestparams.elevhigh.value = stArr['elevhigh'];}
+            if(stArr['assochost']){document.harvestparams.assochost.value = stArr['assochost'];}
+            if(stArr['llbound']){
+                var coordArr = stArr['llbound'].split(';');
+                document.harvestparams.upperlat.value = coordArr[0];
+                document.harvestparams.bottomlat.value = coordArr[1];
+                document.harvestparams.leftlong.value = coordArr[2];
+                document.harvestparams.rightlong.value = coordArr[3];
+            }
+            if(stArr['llpoint']){
+                var coordArr = stArr['llpoint'].split(';');
+                document.harvestparams.pointlat.value = coordArr[0];
+                document.harvestparams.pointlong.value = coordArr[1];
+                document.harvestparams.radiustemp.value = coordArr[2];
+                document.harvestparams.radius.value = coordArr[2]*0.6214;
+            }
+            if(stArr['collector']){document.harvestparams.collector.value = stArr['collector'];}
+            if(stArr['collnum']){document.harvestparams.collnum.value = stArr['collnum'];}
+            if(stArr['eventdate1']){document.harvestparams.eventdate1.value = stArr['eventdate1'];}
+            if(stArr['eventdate2']){document.harvestparams.eventdate2.value = stArr['eventdate2'];}
+            if(stArr['catnum']){document.harvestparams.catnum.value = stArr['catnum'];}
+            //if(!stArr['othercatnum']){document.harvestparams.includeothercatnum.checked = false;}
+            if(stArr['typestatus']){document.harvestparams.typestatus.checked = true;}
+            if(stArr['hasimages']){document.harvestparams.hasimages.checked = true;}
+            if(stArr['hasgenetic']){document.harvestparams.hasgenetic.checked = true;}
+            if(stArr['hasethno']){document.harvestparams.hasethno.checked = true;}
+            if(stArr['hasmultimedia']){document.harvestparams.hasmultimedia.checked = true;}
+            if(stArr['semantics']){
+                var semanticValArr = stArr['semantics'].split(",");
+                for (i = 0; i < semanticValArr.length; i++) {
+                    if(document.getElementById('semcheck-'+semanticValArr[i])){
+                        document.getElementById('semcheck-'+semanticValArr[i]).checked = true;
+                    }
+                    if(document.getElementById('sempar-'+semanticValArr[i])){
+                        document.getElementById('sempar-'+semanticValArr[i]).checked = true;
+                    }
+                }
+            }
+            if(stArr['verbatimVernacularName']){document.harvestparams.verbatimVernacularName.value = stArr['verbatimVernacularName'];}
+            if(stArr['annotatedVernacularName']){document.harvestparams.annotatedVernacularName.value = stArr['annotatedVernacularName'];}
+            if(stArr['verbatimLanguage']){document.harvestparams.verbatimLanguage.value = stArr['verbatimLanguage'];}
+            if(stArr['languageid']){document.harvestparams.languageid.value = stArr['languageid'];}
+            if(stArr['otherVerbatimVernacularName']){document.harvestparams.otherVerbatimVernacularName.value = stArr['otherVerbatimVernacularName'];}
+            if(stArr['otherLangId']){document.harvestparams.otherLangId.value = stArr['otherLangId'];}
+            if(stArr['verbatimParse']){document.harvestparams.verbatimParse.value = stArr['verbatimParse'];}
+            if(stArr['annotatedParse']){document.harvestparams.annotatedParse.value = stArr['annotatedParse'];}
+            if(stArr['verbatimGloss']){document.harvestparams.verbatimGloss.value = stArr['verbatimGloss'];}
+            if(stArr['annotatedGloss']){document.harvestparams.annotatedGloss.value = stArr['annotatedGloss'];}
+            if(stArr['freetranslation']){document.harvestparams.freetranslation.value = stArr['freetranslation'];}
+            if(stArr['taxonomicDescription']){document.harvestparams.taxonomicDescription.value = stArr['taxonomicDescription'];}
+            if(stArr['typology']){document.harvestparams.typology.value = stArr['typology'];}
+            if(stArr['parts']){
+                var partsValArr = stArr['parts'].split(",");
+                for (i = 0; i < partsValArr.length; i++) {
+                    if(document.getElementById('partsUsed-'+partsValArr[i])){
+                        document.getElementById('partsUsed-'+partsValArr[i]).checked = true;
+                    }
+                }
+            }
+            if(stArr['uses']){
+                var usesValArr = stArr['uses'].split(",");
+                for (i = 0; i < usesValArr.length; i++) {
+                    if(document.getElementById('use-'+usesValArr[i])){
+                        document.getElementById('use-'+usesValArr[i]).checked = true;
+                    }
+                }
+            }
+            if(stArr['consultantComments']){document.harvestparams.consultantComments.value = stArr['consultantComments'];}
+            if(sessionStorage.collsearchtableview){
+                document.getElementById('showtable').checked = true;
+                changeTableDisplay();
+            }
+        }
+
+        function resetHarvestParamsForm(f){
+            f.thes.checked = true;
+            f.type.value = 1;
+            f.taxa.value = '';
+            f.country.value = '';
+            f.state.value = '';
+            f.county.value = '';
+            f.local.value = '';
+            f.elevlow.value = '';
+            f.elevhigh.value = '';
+            if(f.assochost){f.assochost.value = '';}
+            f.upperlat.value = '';
+            f.bottomlat.value = '';
+            f.leftlong.value = '';
+            f.rightlong.value = '';
+            f.upperlat_NS.value = 'N';
+            f.bottomlat_NS.value = 'N';
+            f.leftlong_EW.value = 'W';
+            f.rightlong_EW.value = 'W';
+            f.pointlat.value = '';
+            f.pointlong.value = '';
+            f.radiustemp.value = '';
+            f.pointlat_NS.value = 'N';
+            f.pointlong_EW.value = 'W';
+            f.radiusunits.value = 'km';
+            f.radius.value = '';
+            f.collector.value = '';
+            f.collnum.value = '';
+            f.eventdate1.value = '';
+            f.eventdate2.value = '';
+            f.catnum.value = '';
+            f.includeothercatnum.checked = true;
+            f.typestatus.checked = false;
+            f.hasimages.checked = false;
+            var semanticElements = document.getElementsByName("semantics[]");
+            for(i = 0; i < semanticElements.length; i++){
+                semanticElements[i].checked = false;
+            }
+            f.verbatimVernacularName.value = '';
+            f.annotatedVernacularName.value = '';
+            f.verbatimLanguage.value = '';
+            f.languageid.value = '';
+            f.otherVerbatimVernacularName.value = '';
+            f.otherLangId.value = '';
+            f.verbatimParse.value = '';
+            f.annotatedParse.value = '';
+            f.verbatimGloss.value = '';
+            f.annotatedGloss.value = '';
+            f.freetranslation.value = '';
+            f.taxonomicDescription.value = '';
+            var typologyElements = document.getElementsByName('typology');
+            for (var i = 0; i < typologyElements.length; i++) {
+                typologyElements[i].checked = false;
+            }
+            var partsElements = document.getElementsByName("parts[]");
+            for(i = 0; i < partsElements.length; i++){
+                partsElements[i].checked = false;
+            }
+            var usesElements = document.getElementsByName("uses[]");
+            for(i = 0; i < usesElements.length; i++){
+                usesElements[i].checked = false;
+            }
+            f.consultantComments.value = '';
+            sessionStorage.removeItem('jsonstarr');
+            document.getElementById('showtable').checked = false;
+            changeTableDisplay();
+        }
+
         function checkHarvestparamsForm(frm){
             <?php
             if(!$SOLR_MODE){
@@ -73,7 +262,7 @@ if(isset($_REQUEST['db'])){
                 if ((frm.taxa.value == '') && (frm.country.value == '') && (frm.state.value == '') && (frm.county.value == '') &&
                     (frm.locality.value == '') && (frm.upperlat.value == '') && (frm.pointlat.value == '') && (frm.catnum.value == '') &&
                     (frm.elevhigh.value == '') && (frm.eventdate2.value == '') && (frm.typestatus.checked == false) && (frm.hasimages.checked == false) && (frm.hasgenetic.checked == false) &&
-                    (frm.collector.value == '') && (frm.collnum.value == '') && (frm.eventdate1.value == '') && (frm.elevlow.value == '')) {
+                    (frm.collector.value == '') && (frm.collnum.value == '') && (frm.eventdate1.value == '') && (frm.elevlow.value == '') && (frm.hasethno.checked == false) && (frm.hasmultimedia.checked == false)) {
                     if(sessionStorage.jsoncollstarr){
                         var jsonArr = JSON.parse(sessionStorage.jsoncollstarr);
                         for(i in jsonArr){
@@ -135,10 +324,30 @@ if(isset($_REQUEST['db'])){
 
             return true;
         }
+
+        function checkSemanticParent(divid){
+            document.getElementById(divid).checked = true;
+        }
+
+        function toggleEthnoDiv(targetName){
+            var plusDivId = 'plusButton'+targetName;
+            var minusDivId = 'minusButton'+targetName;
+            var contentDivId = 'content'+targetName;
+            var display = document.getElementById(contentDivId).style.display;
+            if(display === 'none'){
+                document.getElementById(contentDivId).style.display = 'block';
+                document.getElementById(plusDivId).style.display = 'none';
+                document.getElementById(minusDivId).style.display = 'flex';
+            }
+            if(display === 'block'){
+                document.getElementById(contentDivId).style.display = 'none';
+                document.getElementById(plusDivId).style.display = 'flex';
+                document.getElementById(minusDivId).style.display = 'none';
+            }
+        }
     </script>
 </head>
 <body>
-
 <?php
 	$displayLeftMenu = (isset($collections_harvestparamsMenu)?$collections_harvestparamsMenu:false);
 	include($serverRoot.'/header.php');
@@ -167,7 +376,7 @@ if(isset($_REQUEST['db'])){
         <div style="margin:5px;">
 			<input type='checkbox' name='showtable' id='showtable' value='1' onchange="changeTableDisplay();" /> Show results in table view
 		</div>
-		<form name="harvestparams" id="harvestparams" action="list.php" method="post" onsubmit="return checkHarvestparamsForm(this);">
+		<form name="harvestparams" id="harvestparams" action="list.php" method="post">
 			<div style="margin:10 0 10 0;"><hr></div>
 			<div style='float:right;margin:5px 10px;'>
 				<div style="margin-bottom:10px"><input type="submit" class="nextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" /></div>
@@ -184,7 +393,13 @@ if(isset($_REQUEST['db'])){
 						<option value='2'><?php echo $SEARCHTEXT['SELECT_1-2']; ?></option>
 						<option value='3'><?php echo $SEARCHTEXT['SELECT_1-3']; ?></option>
 						<option value='4'><?php echo $SEARCHTEXT['SELECT_1-4']; ?></option>
-						<option value='5'><?php echo $SEARCHTEXT['SELECT_1-5']; ?></option>
+						<?php
+                        if(!$ETHNO_ACTIVE){
+                            ?>
+                            <option value='5'><?php echo $SEARCHTEXT['SELECT_1-5']; ?></option>
+                            <?php
+                        }
+                        ?>
 					</select>:
 					<input id="taxa" type="text" size="60" name="taxa" value="" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
 				</div>
@@ -325,6 +540,192 @@ if(isset($_REQUEST['db'])){
             <div id="searchGeneticCheckbox">
                 <input type='checkbox' name='hasgenetic' value='1' /> <?php echo $SEARCHTEXT['HAS_GENETIC']; ?>
             </div>
+            <?php
+            if($ETHNO_ACTIVE){
+                ?>
+                <div id="searchEthnoCheckbox">
+                    <input type='checkbox' name='hasethno' value='1' /> Limit to Specimens with Ethnobiological Data
+                </div>
+                <div id="searchEthnoMultimediaCheckbox">
+                    <input type='checkbox' name='hasmultimedia' value='1' /> Limit to Specimens with Multimedia Files
+                </div>
+                <div>
+                    <h1>Ethnobiological Criteria:</h1>
+                </div>
+                <div style="float:right;">
+                    <input type="submit" class="nextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" />
+                </div>
+                <div>
+                    <div style="cursor:pointer;font-size:13px;" onclick="toggleEthnoDiv('NameSemantic');">
+                        <div id='plusButtonNameSemantic' style="display:none;align-items:center;">
+                            Semantic Tags: <img style='border:0;margin-left:8px;width:13px;' src='../images/plus.png' />
+                        </div>
+                        <div id='minusButtonNameSemantic' style="display:flex;align-items:center;">
+                            Semantic Tags: <img style='border:0;margin-left:8px;width:13px;' src='../images/minus.png' />
+                        </div>
+                    </div>
+                    <div id="contentNameSemantic" style="display:block;padding-left:15px;clear:both;">
+                        <?php
+                        foreach($ethnoNameSemanticTagArr as $id => $smtArr){
+                            $pTag = $smtArr['ptag'];
+                            $pDesc = $smtArr['pdesc'];
+                            $pTagLine = $pTag.' '.$pDesc;
+                            $checkStr = "'sempar-".$id."'";
+                            echo '<input name="semantics[]" id="sempar-'.$id.'" value="'.$id.'" type="checkbox" /> '.$pTagLine.'<br />';
+                            unset($smtArr['ptag'], $smtArr['pdesc']);
+                            if($smtArr){
+                                echo '<div style="padding-left:15px;clear:both;">';
+                                foreach($smtArr as $cid => $cArr){
+                                    $cTag = $cArr['ctag'];
+                                    $cDesc = $cArr['cdesc'];
+                                    $cTagLine = $cTag.' '.$cDesc;
+                                    echo '<input name="semantics[]" id="semcheck-'.$cid.'" value="'.$cid.'" type="checkbox" onchange="checkSemanticParent('.$checkStr.');" /> '.$cTagLine.'<br />';
+                                }
+                                echo '</div>';
+                            }
+                        }
+                        ?>
+                    </div>
+                </div>
+                <div style="margin-top:15px;">
+                    Verbatim vernacular name: <input name="verbatimVernacularName" id="verbatimVernacularName" type="text" size="60" />
+                </div>
+                <div>
+                    Annotated vernacular name: <input name="annotatedVernacularName" id="annotatedVernacularName" type="text" size="60" />
+                </div>
+                <div>
+                    Verbatim language: <input name="verbatimLanguage" id="verbatimLanguage" type="text" size="60" />
+                </div>
+                <div>
+                    Glottolog language: <select id="ethnoNameLanguage" name="languageid" style="width:500px;">
+                        <option value="">----Select Language----</option>
+                        <?php
+                        foreach($langArr as $k => $v){
+                            echo '<option value="'.$v['id'].'">'.$v['name'].'</option>';
+                        }
+                        ?>
+                    </select>
+                </div>
+                <div>
+                    Other verbatim vernacular name: <input name="otherVerbatimVernacularName" id="otherVerbatimVernacularName" type="text" size="60" />
+                </div>
+                <div>
+                    Glottolog language: <select name="otherLangId" id="otherLangId" style="width:500px;">
+                        <option value="">----Select Language----</option>
+                        <?php
+                        foreach($langArr as $k => $v){
+                            echo '<option value="'.$v['id'].'">'.$v['name'].'</option>';
+                        }
+                        ?>
+                    </select>
+                </div>
+                <div>
+                    Verbatim parse: <input name="verbatimParse" id="verbatimParse" type="text" size="60" />
+                </div>
+                <div>
+                    Annotated parse: <input name="annotatedParse" id="annotatedParse" type="text" size="60" />
+                </div>
+                <div>
+                    Verbatim gloss: <input name="verbatimGloss" id="verbatimGloss" type="text" size="60" />
+                </div>
+                <div>
+                    Annotated gloss: <input name="annotatedGloss" id="annotatedGloss" type="text" size="60" />
+                </div>
+                <div>
+                    Free translation: <input name="freetranslation" id="freetranslation" type="text" size="60" />
+                </div>
+                <div>
+                    Taxonomic description: <input name="taxonomicDescription" id="taxonomicDescription" type="text" size="60" />
+                </div>
+                <div>
+                    <span style="font-size:13px;">Typology:</span>
+                    <div style="clear:both;margin-left:20px;">
+                        <input type="radio" name="typology" id="typology-opaque" value="opaque"> Opaque<br />
+                        <input type="radio" name="typology" id="typology-transparent" value="transparent"> Transparent<br />
+                        <input type="radio" name="typology" id="typology-modifiedopaque" value="modifiedopaque"> Modified opaque<br />
+                        <input type="radio" name="typology" id="typology-modifiedtransparent" value="modifiedtransparent"> Modified transparent
+                    </div>
+                </div>
+                <div style="float:right;">
+                    <input type="submit" class="nextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" />
+                </div>
+                <div style="margin-top:10px;">
+                    <div style="cursor:pointer;font-size:13px;" onclick="toggleEthnoDiv('PartsUsed');">
+                        <div id='plusButtonPartsUsed' style="display:none;align-items:center;">
+                            Parts used: <img style='border:0;margin-left:8px;width:13px;' src='../images/plus.png' />
+                        </div>
+                        <div id='minusButtonPartsUsed' style="display:flex;align-items:center;">
+                            Parts used: <img style='border:0;margin-left:8px;width:13px;' src='../images/minus.png' />
+                        </div>
+                    </div>
+                    <div id="contentPartsUsed" style="display:block;padding-left:15px;clear:both;">
+                        <?php
+                        foreach($ethnoUsePartsUsedTagArr as $tid => $tidPArr){
+                            echo '<div id="part-'.$tid.'">';
+                            foreach($tidPArr as $id => $text){
+                                echo '<input name="parts[]" id="partsUsed-'.$id.'" value="'.$id.'" type="checkbox"/> '.$text.'<br />';
+                            }
+                            echo '</div>';
+                        }
+                        ?>
+                    </div>
+                </div>
+                <div style="margin-top:10px;">
+                    <div style="cursor:pointer;font-size:13px;" onclick="toggleEthnoDiv('Uses');">
+                        <div id='plusButtonUses' style="display:flex;align-items:center;">
+                            Uses: <img style='border:0;margin-left:8px;width:13px;' src='../images/plus.png' />
+                        </div>
+                        <div id='minusButtonUses' style="display:none;align-items:center;">
+                            Uses: <img style='border:0;margin-left:8px;width:13px;' src='../images/minus.png' />
+                        </div>
+                    </div>
+                    <div id="contentUses" style="display:none;padding-left:15px;clear:both;">
+                        <?php
+                        foreach($ethnoUseUseTagArr as $tid => $tidUArr){
+                            echo '<div id="use-'.$tid.'">';
+                            foreach($tidUArr as $id => $uArr){
+                                $header = $uArr['header'];
+                                unset($uArr['header']);
+                                if($header){
+                                    $headerStr = str_replace(' ','',$header);
+                                    echo '<div style="clear:both;margin-top:10px;">';
+                                    ?>
+                                    <div style="cursor:pointer;font-size:13px;" onclick="toggleEthnoDiv('<?php echo $headerStr; ?>');">
+                                        <div id='plusButton<?php echo $headerStr; ?>' style="display:flex;align-items:center;">
+                                            <?php echo $header; ?>: <img style='border:0;margin-left:8px;width:13px;' src='../images/plus.png' />
+                                        </div>
+                                        <div id='minusButton<?php echo $headerStr; ?>' style="display:none;align-items:center;">
+                                            <?php echo $header; ?>: <img style='border:0;margin-left:8px;width:13px;' src='../images/minus.png' />
+                                        </div>
+                                    </div>
+                                    <?php
+                                    echo '<div id="content'.$headerStr.'" style="display:none;padding-left:15px;clear:both;">';
+                                    foreach($uArr as $uid => $text){
+                                        echo '<input name="uses[]" id="use-'.$uid.'" value="'.$uid.'" type="checkbox"/> '.$text.'<br />';
+                                    }
+                                    echo '</div>';
+                                    echo '</div>';
+                                }
+                                else{
+                                    foreach($uArr as $uid => $text){
+                                        echo '<input name="uses[]" id="use-'.$uid.'" value="'.$uid.'" type="checkbox"/> '.$text.'<br />';
+                                    }
+                                }
+                            }
+                            echo '</div>';
+                        }
+                        ?>
+                    </div>
+                </div>
+                <div style="margin-top:15px;">
+                    Consultant comments: <input name="consultantComments" id="consultantComments" type="text" size="60" />
+                </div>
+                <div style="float:right;">
+                    <input type="submit" class="nextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" />
+                </div>
+                <?php
+            }
+            ?>
 			<input type="hidden" name="reset" value="1" />
 		</form>
     </div>

@@ -2,6 +2,7 @@
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/content/lang/collections/checklist.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceChecklistManager.php');
+include_once($SERVER_ROOT.'/classes/EthnoSearchManager.php');
 include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 
 $checklistManager = new OccurrenceChecklistManager();
@@ -17,6 +18,7 @@ $taxaCnt = 0;
 
 $solrManager = new SOLRManager();
 $checklistManager = new OccurrenceChecklistManager();
+$ethnoSearchManager = new EthnoSearchManager();
 
 if($stArrCollJson || $stArrSearchJson){
 	$stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
@@ -36,6 +38,11 @@ if($stArrCollJson || $stArrSearchJson){
             $checklistArr = $solrManager->translateSOLRTaxaList($solrArr);
             $taxaCnt = $solrManager->getChecklistTaxaCnt();
         }
+    }
+    elseif($ETHNO_ACTIVE){
+        $ethnoSearchManager->setSearchTermsArr($stArr);
+        $checklistArr = $ethnoSearchManager->getChecklist($taxonFilter);
+        $taxaCnt = $ethnoSearchManager->getChecklistTaxaCnt();
     }
     else{
         $checklistManager->setSearchTermsArr($stArr);

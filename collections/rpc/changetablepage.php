@@ -2,6 +2,7 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/content/lang/collections/list.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceListManager.php');
+include_once($SERVER_ROOT.'/classes/EthnoSearchManager.php');
 include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 
 $stArrCollJson = $_REQUEST["jsoncollstarr"];
@@ -25,6 +26,12 @@ if($SOLR_MODE){
     $collManager->setSorting($sortField1,$sortField2,$sortOrder);
     $solrArr = $collManager->getRecordArr($occIndex,1000);
     $recArr = $collManager->translateSOLRRecList($solrArr);
+}
+elseif($ETHNO_ACTIVE){
+    $collManager = new EthnoSearchManager(false);
+    $collManager->setSearchTermsArr($stArr);
+    $collManager->setSorting($sortField1,$sortField2,$sortOrder);
+    $recArr = $collManager->getRecordArr($occIndex,1000);
 }
 else{
     $collManager = new OccurrenceListManager(false);

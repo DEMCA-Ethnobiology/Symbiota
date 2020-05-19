@@ -4,6 +4,8 @@ include_once($SERVER_ROOT.'/config/includes/searchVarDefault.php');
 include_once($SERVER_ROOT.'/classes/TaxonProfileMap.php');
 include_once($SERVER_ROOT.'/classes/MapInterfaceManager.php');
 include_once($SERVER_ROOT.'/classes/SOLRManager.php');
+include_once($SERVER_ROOT.'/classes/EthnoDataManager.php');
+include_once($SERVER_ROOT.'/classes/EthnoSearchManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
 header('Pragma: no-cache'); // HTTP 1.0.
@@ -25,6 +27,8 @@ $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:1;
 
 $mapManager = new MapInterfaceManager();
 $solrManager = new SOLRManager();
+$ethnoDataManager = new EthnoDataManager();
+$ethnoSearchManager = new EthnoSearchManager();
 $queryShape = '';
 $showTaxaBut = 1;
 
@@ -129,19 +133,38 @@ if($mapType && $mapType == 'taxa'){
     $tArr = $taxaMapManager->getTaxaArr();
 }
 elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
-    if($stArr){
-        $mapManager->setSearchTermsArr($stArr);
+    if(!$ETHNO_ACTIVE){
+        if($stArr){
+            $mapManager->setSearchTermsArr($stArr);
+        }
+        $mapWhere = $mapManager->getSqlWhere();
+        if(!$stArr){
+            $stArr = $mapManager->getSearchTermsArr();
+        }
+        if(!$SOLR_MODE){
+            $mapManager->setRecordCnt($mapWhere);
+            $recordCnt = $mapManager->getRecordCnt();
+        }
     }
-    $mapWhere = $mapManager->getSqlWhere();
-    if(!$stArr){
-        $stArr = $mapManager->getSearchTermsArr();
-    }
-    if(!$SOLR_MODE){
-        $mapManager->setRecordCnt($mapWhere);
-        $recordCnt = $mapManager->getRecordCnt();
+    else{
+        if($stArr){
+            $ethnoSearchManager->setSearchTermsArr($stArr);
+        }
+        $mapWhere = $ethnoSearchManager->getSqlWhere();
+        if(!$stArr){
+            $stArr = $ethnoSearchManager->getSearchTermsArr();
+        }
+        $ethnoSearchManager->setRecordCnt($mapWhere);
+        $recordCnt = $ethnoSearchManager->getRecordCnt();
     }
 
     $jsonStArr = json_encode($stArr);
+}
+if($ETHNO_ACTIVE){
+    $langArr = $ethnoDataManager->getLangNameSearchDropDownList();
+    $ethnoNameSemanticTagArr = $ethnoDataManager->getNameSemanticTagArr();
+    $ethnoUsePartsUsedTagArr = $ethnoDataManager->getPartsUsedTagArrFull();
+    $ethnoUseUseTagArr = $ethnoSearchManager->getUseTagArrFull();
 }
 ?>
 <html>
@@ -1367,6 +1390,27 @@ elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
             },5)
         }
 
+        function checkSemanticParent(divid){
+            document.getElementById(divid).checked = true;
+        }
+
+        function toggleEthnoDiv(targetName){
+            var plusDivId = 'plusButton'+targetName;
+            var minusDivId = 'minusButton'+targetName;
+            var contentDivId = 'content'+targetName;
+            var display = document.getElementById(contentDivId).style.display;
+            if(display === 'none'){
+                document.getElementById(contentDivId).style.display = 'block';
+                document.getElementById(plusDivId).style.display = 'none';
+                document.getElementById(minusDivId).style.display = 'flex';
+            }
+            if(display === 'block'){
+                document.getElementById(contentDivId).style.display = 'none';
+                document.getElementById(plusDivId).style.display = 'flex';
+                document.getElementById(minusDivId).style.display = 'none';
+            }
+        }
+
         <?php echo ($GEOLOCATION?"google.maps.event.addDomListener(window, 'load', getCoords);":""); ?>
     </script>
 </head>
@@ -1563,6 +1607,196 @@ elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
                                 <div id="searchGeneticCheckbox" style="margin-top:5px;">
                                     <input data-role="none" type='checkbox' name='hasgenetic' value='1' <?php if(array_key_exists("hasgenetic",$previousCriteria) && $previousCriteria["hasgenetic"]) echo "CHECKED"; ?> > <?php echo $SEARCHTEXT['HAS_GENETIC']; ?>
                                 </div>
+                                <?php
+                                if($ETHNO_ACTIVE){
+                                    ?>
+                                    <div id="searchEthnoCheckbox" style="margin-top:5px;">
+                                        <input data-role="none" type='checkbox' name='hasethno' value='1' <?php if(array_key_exists("hasethno",$previousCriteria) && $previousCriteria["hasethno"]) echo "CHECKED"; ?> > Limit to Specimens with Ethnobiological Data
+                                    </div>
+                                    <div id="searchEthnoMultimediaCheckbox" style="margin-top:5px;">
+                                        <input data-role="none" type='checkbox' name='hasmultimedia' value='1' <?php if(array_key_exists("hasmultimedia",$previousCriteria) && $previousCriteria["hasmultimedia"]) echo "CHECKED"; ?> > Limit to Specimens with Multimedia Files
+                                    </div>
+                                    <div style="margin:10 0 10 0;"><hr></div>
+                                    <div>
+                                        <div style="cursor:pointer;font-size:13px;" onclick="toggleEthnoDiv('NameSemantic');">
+                                            <div id='plusButtonNameSemantic' style="display:none;align-items:center;">
+                                                Semantic Tags: <img style='border:0;margin-left:8px;width:13px;' src='../../images/plus.png' />
+                                            </div>
+                                            <div id='minusButtonNameSemantic' style="display:flex;align-items:center;">
+                                                Semantic Tags: <img style='border:0;margin-left:8px;width:13px;' src='../../images/minus.png' />
+                                            </div>
+                                        </div>
+                                        <div id="contentNameSemantic" style="display:block;padding-left:15px;clear:both;">
+                                            <?php
+                                            foreach($ethnoNameSemanticTagArr as $id => $smtArr){
+                                                $pTag = $smtArr['ptag'];
+                                                $pDesc = $smtArr['pdesc'];
+                                                $pTagLine = $pTag.' '.$pDesc;
+                                                $checkStr = "'sempar-".$id."'";
+                                                echo '<div style="clear:both;width:100%;margin-top:5px;">';
+                                                echo '<div style="width:20px;float:left;"><input data-role="none" name="semantics[]" id="sempar-'.$id.'" value="'.$id.'" type="checkbox" '.((array_key_exists("semantics",$previousCriteria) && in_array($id,$previousCriteria["semantics"]))?"CHECKED":'').' /></div>';
+                                                echo '<div style="width:300px;float:right;">'.$pTagLine.'</div>';
+                                                echo '</div>';
+                                                unset($smtArr['ptag'], $smtArr['pdesc']);
+                                                if($smtArr){
+                                                    echo '<div style="padding-left:15px;padding-top:5px;clear:both;">';
+                                                    foreach($smtArr as $cid => $cArr){
+                                                        $cTag = $cArr['ctag'];
+                                                        $cDesc = $cArr['cdesc'];
+                                                        $cTagLine = $cTag.' '.$cDesc;
+                                                        echo '<div style="clear:both;width:100%;">';
+                                                        echo '<div style="width:20px;float:left;"><input data-role="none" name="semantics[]" id="semcheck-'.$cid.'" value="'.$cid.'" type="checkbox" onchange="checkSemanticParent('.$checkStr.');" '.((array_key_exists("semantics",$previousCriteria) && in_array($id,$previousCriteria["semantics"]))?"CHECKED":'').' /></div>';
+                                                        echo '<div style="width:280px;float:right;">'.$cTagLine.'</div>';
+                                                        echo '</div>';
+                                                    }
+                                                    echo '</div>';
+                                                }
+                                            }
+                                            ?>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        Verbatim vernacular name: <input data-role="none" type="text" id="verbatimVernacularName" style="width:115px;" name="verbatimVernacularName" value="<?php if(array_key_exists("verbatimVernacularName",$previousCriteria)) echo $previousCriteria["verbatimVernacularName"]; ?>" />
+                                    </div>
+                                    <div>
+                                        Annotated vernacular name: <input data-role="none" type="text" id="annotatedVernacularName" style="width:115px;" name="annotatedVernacularName" value="<?php if(array_key_exists("annotatedVernacularName",$previousCriteria)) echo $previousCriteria["annotatedVernacularName"]; ?>" />
+                                    </div>
+                                    <div>
+                                        Verbatim language: <input data-role="none" type="text" id="verbatimLanguage" style="width:115px;" name="verbatimLanguage" value="<?php if(array_key_exists("verbatimLanguage",$previousCriteria)) echo $previousCriteria["verbatimLanguage"]; ?>" />
+                                    </div>
+                                    <div>
+                                        Glottolog language: <select data-role="none" id="ethnoNameLanguage" name="languageid" style="width:200px;">
+                                            <option value="">----Select Language----</option>
+                                            <?php
+                                            foreach($langArr as $k => $v){
+                                                echo '<option value="'.$v['id'].'">'.$v['name'].'</option>';
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        Other verbatim vernacular name: <input data-role="none" type="text" id="otherVerbatimVernacularName" style="width:100px;" name="otherVerbatimVernacularName" value="<?php if(array_key_exists("otherVerbatimVernacularName",$previousCriteria)) echo $previousCriteria["otherVerbatimVernacularName"]; ?>" />
+                                    </div>
+                                    <div>
+                                        Glottolog language: <select data-role="none" id="otherLangId" name="otherLangId" style="width:200px;">
+                                            <option value="">----Select Language----</option>
+                                            <?php
+                                            foreach($langArr as $k => $v){
+                                                echo '<option value="'.$v['id'].'">'.$v['name'].'</option>';
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        Verbatim parse: <input data-role="none" type="text" id="verbatimParse" style="width:115px;" name="verbatimParse" value="<?php if(array_key_exists("verbatimParse",$previousCriteria)) echo $previousCriteria["verbatimParse"]; ?>" />
+                                    </div>
+                                    <div>
+                                        Annotated parse: <input data-role="none" type="text" id="annotatedParse" style="width:115px;" name="annotatedParse" value="<?php if(array_key_exists("annotatedParse",$previousCriteria)) echo $previousCriteria["annotatedParse"]; ?>" />
+                                    </div>
+                                    <div>
+                                        Verbatim gloss: <input data-role="none" type="text" id="verbatimGloss" style="width:115px;" name="verbatimGloss" value="<?php if(array_key_exists("verbatimGloss",$previousCriteria)) echo $previousCriteria["verbatimGloss"]; ?>" />
+                                    </div>
+                                    <div>
+                                        Annotated gloss: <input data-role="none" type="text" id="annotatedGloss" style="width:115px;" name="annotatedGloss" value="<?php if(array_key_exists("annotatedGloss",$previousCriteria)) echo $previousCriteria["annotatedGloss"]; ?>" />
+                                    </div>
+                                    <div>
+                                        Free translation: <input data-role="none" type="text" id="freetranslation" style="width:115px;" name="freetranslation" value="<?php if(array_key_exists("freetranslation",$previousCriteria)) echo $previousCriteria["freetranslation"]; ?>" />
+                                    </div>
+                                    <div>
+                                        Taxonomic description: <input data-role="none" type="text" id="taxonomicDescription" style="width:115px;" name="taxonomicDescription" value="<?php if(array_key_exists("taxonomicDescription",$previousCriteria)) echo $previousCriteria["taxonomicDescription"]; ?>" />
+                                    </div>
+                                    <div>
+                                        <span style="font-size:13px;">Typology:</span>
+                                        <div style="clear:both;margin-left:20px;">
+                                            <input data-role="none" type="radio" name="typology" id="typology-opaque" value="opaque"> Opaque<br />
+                                            <input data-role="none" type="radio" name="typology" id="typology-transparent" value="transparent"> Transparent<br />
+                                            <input data-role="none" type="radio" name="typology" id="typology-modifiedopaque" value="modifiedopaque"> Modified opaque<br />
+                                            <input data-role="none" type="radio" name="typology" id="typology-modifiedtransparent" value="modifiedtransparent"> Modified transparent
+                                        </div>
+                                    </div>
+                                    <div style="padding-top:10px;">
+                                        <div style="cursor:pointer;font-size:13px;" onclick="toggleEthnoDiv('PartsUsed');">
+                                            <div id='plusButtonPartsUsed' style="display:none;align-items:center;">
+                                                Parts used: <img style='border:0;margin-left:8px;width:13px;' src='../../images/plus.png' />
+                                            </div>
+                                            <div id='minusButtonPartsUsed' style="display:flex;align-items:center;">
+                                                Parts used: <img style='border:0;margin-left:8px;width:13px;' src='../../images/minus.png' />
+                                            </div>
+                                        </div>
+                                        <div id="contentPartsUsed" style="display:block;padding-left:15px;clear:both;">
+                                            <?php
+                                            foreach($ethnoUsePartsUsedTagArr as $tid => $tidPArr){
+                                                echo '<div id="part-'.$tid.'">';
+                                                foreach($tidPArr as $id => $text){
+                                                    echo '<div style="clear:both;width:100%;margin-top:5px;">';
+                                                    echo '<div style="width:20px;float:left;"><input data-role="none" name="parts[]" id="partsUsed-'.$id.'" value="'.$id.'" type="checkbox" '.((array_key_exists("parts",$previousCriteria) && in_array($id,$previousCriteria["parts"]))?"CHECKED":'').' /></div>';
+                                                    echo '<div style="width:280px;float:right;">'.$text.'</div>';
+                                                    echo '</div>';
+                                                }
+                                                echo '</div>';
+                                            }
+                                            ?>
+                                        </div>
+                                    </div>
+                                    <div style="padding-top:10px;clear:both;">
+                                        <div style="cursor:pointer;font-size:13px;" onclick="toggleEthnoDiv('Uses');">
+                                            <div id='plusButtonUses' style="display:flex;align-items:center;">
+                                                Uses: <img style='border:0;margin-left:8px;width:13px;' src='../../images/plus.png' />
+                                            </div>
+                                            <div id='minusButtonUses' style="display:none;align-items:center;">
+                                                Uses: <img style='border:0;margin-left:8px;width:13px;' src='../../images/minus.png' />
+                                            </div>
+                                        </div>
+                                        <div id="contentUses" style="display:none;padding-left:15px;clear:both;">
+                                            <?php
+                                            foreach($ethnoUseUseTagArr as $tid => $tidUArr){
+                                                echo '<div id="use-'.$tid.'">';
+                                                foreach($tidUArr as $id => $uArr){
+                                                    $header = $uArr['header'];
+                                                    unset($uArr['header']);
+                                                    if($header){
+                                                        $headerStr = str_replace(' ','',$header);
+                                                        echo '<div style="clear:both;margin-top:10px;">';
+                                                        ?>
+                                                        <div style="cursor:pointer;font-size:13px;" onclick="toggleEthnoDiv('<?php echo $headerStr; ?>');">
+                                                            <div id='plusButton<?php echo $headerStr; ?>' style="display:flex;align-items:center;">
+                                                                <?php echo $header; ?>: <img style='border:0;margin-left:8px;width:13px;' src='../../images/plus.png' />
+                                                            </div>
+                                                            <div id='minusButton<?php echo $headerStr; ?>' style="display:none;align-items:center;">
+                                                                <?php echo $header; ?>: <img style='border:0;margin-left:8px;width:13px;' src='../../images/minus.png' />
+                                                            </div>
+                                                        </div>
+                                                        <?php
+                                                        echo '<div id="content'.$headerStr.'" style="display:none;padding-left:15px;clear:both;">';
+                                                        foreach($uArr as $uid => $text){
+                                                            echo '<div style="clear:both;width:100%;margin-top:5px;">';
+                                                            echo '<div style="width:20px;float:left;"><input data-role="none" name="uses[]" id="use-'.$uid.'" value="'.$uid.'" type="checkbox" '.((array_key_exists("uses",$previousCriteria) && in_array($id,$previousCriteria["uses"]))?"CHECKED":'').' /></div>';
+                                                            echo '<div style="width:260px;float:right;">'.$text.'</div>';
+                                                            echo '</div>';
+                                                        }
+                                                        echo '</div>';
+                                                        echo '</div>';
+                                                    }
+                                                    else{
+                                                        foreach($uArr as $uid => $text){
+                                                            echo '<div style="clear:both;width:100%;margin-top:5px;">';
+                                                            echo '<div style="width:20px;float:left;"><input data-role="none" name="uses[]" id="use-'.$uid.'" value="'.$uid.'" type="checkbox" '.((array_key_exists("uses",$previousCriteria) && in_array($id,$previousCriteria["uses"]))?"CHECKED":'').' /></div>';
+                                                            echo '<div style="width:280px;float:right;">'.$text.'</div>';
+                                                            echo '</div>';
+                                                        }
+                                                    }
+                                                }
+                                                echo '</div>';
+                                            }
+                                            ?>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        Consultant comments: <input data-role="none" type="text" id="consultantComments" style="width:115px;" name="consultantComments" value="<?php if(array_key_exists("consultantComments",$previousCriteria)) echo $previousCriteria["consultantComments"]; ?>" />
+                                    </div>
+                                    <?php
+                                }
+                                ?>
                                 <div><hr></div>
                                 <input type="hidden" name="reset" value="1" />
                             </div>

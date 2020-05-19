@@ -2,6 +2,7 @@
 include_once('../../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/MapInterfaceManager.php');
 include_once($SERVER_ROOT.'/classes/SOLRManager.php');
+include_once($SERVER_ROOT.'/classes/EthnoSearchManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $cntPerPage = array_key_exists("cntperpage",$_REQUEST)?$_REQUEST["cntperpage"]:100;
@@ -24,6 +25,13 @@ if($SOLR_MODE){
     $solrArr = $mapManager->getGeoArr($pageNumber,$cntPerPage);
     $occArr = $mapManager->translateSOLRMapRecList($solrArr);
     $recordCnt = $mapManager->getRecordCnt();
+}
+elseif($ETHNO_ACTIVE){
+	$mapManager = new EthnoSearchManager(false);
+	$mapManager->setSearchTermsArr($stArr);
+	$mapWhere = $mapManager->getSqlWhere();
+	$occArr = $mapManager->getMapSpecimenArr($pageNumber,$cntPerPage,$mapWhere);
+	$recordCnt = $mapManager->getRecordCnt();
 }
 else{
     $mapManager = new MapInterfaceManager();

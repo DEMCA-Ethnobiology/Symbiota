@@ -72,7 +72,7 @@
 		if($type == "keywords"){
 			$sql = "SELECT DISTINCT keyword ".
 				"FROM imagekeywords ".
-				"WHERE keyword LIKE '".$queryString."%' ".
+				"WHERE keyword LIKE '%".$queryString."%' ".
 				"LIMIT 10 ";
 			$result = $con->query($sql);
 			$i = 0;

@@ -411,6 +411,14 @@ class MapInterfaceManager{
             $sqlWhere .= 'AND (o.occid IN(SELECT occid FROM omoccurgenetic)) ';
             $this->localSearchArr[] = 'has genetic data';
         }
+        if(array_key_exists('hasethno',$this->searchTermsArr)&&$this->searchTermsArr["hasethno"]){
+            $sqlWhere .= 'AND (o.occid IN(SELECT occid FROM ethnodata)) ';
+            $this->localSearchArr[] = 'has ethnobiological data';
+        }
+        if(array_key_exists('hasmultimedia',$this->searchTermsArr)&&$this->searchTermsArr["hasmultimedia"]){
+            $sqlWhere .= 'AND (o.occid IN(SELECT occid FROM ethnomedocclink)) ';
+            $this->localSearchArr[] = 'has multimedia files';
+        }
 		$retStr = '';
 		if($sqlWhere){
 			$retStr = 'WHERE '.substr($sqlWhere,4);
@@ -660,20 +668,12 @@ class MapInterfaceManager{
 			$country = $this->conn->real_escape_string($_REQUEST["country"]);
 			if($country){
 				$str = str_replace(",",";",$country);
-				if(stripos($str, "USA") !== false || stripos($str, "United States") !== false || stripos($str, "U.S.A.") !== false || stripos($str, "United States of America") !== false){
-                    if(stripos($str, "USA") === false){
-                        $str .= ";USA";
-                    }
-                    if(stripos($str, "United States") === false){
-                        $str .= ";United States";
-                    }
-                    if(stripos($str, "U.S.A.") === false){
-                        $str .= ";U.S.A.";
-                    }
-                    if(stripos($str, "United States of America") === false){
-                        $str .= ";United States of America";
-                    }
-                }
+				if(stripos($str, "USA") !== false && stripos($str, "United States") === false){
+					$str .= ";United States";
+				}
+				elseif(stripos($str, "United States") !== false && stripos($str, "USA") === false){
+					$str .= ";USA";
+				}
 				$this->searchTermsArr["country"] = $str;
 			}
         }
@@ -756,6 +756,18 @@ class MapInterfaceManager{
             $hasgenetic = $_REQUEST["hasgenetic"];
             if($hasgenetic){
                 $this->searchTermsArr["hasgenetic"] = true;
+            }
+        }
+        if(array_key_exists("hasethno",$_REQUEST)){
+            $hasethno = $_REQUEST["hasethno"];
+            if($hasethno){
+                $this->searchTermsArr["hasethno"] = true;
+            }
+        }
+        if(array_key_exists("hasmultimedia",$_REQUEST)){
+            $hasmultimedia = $_REQUEST["hasmultimedia"];
+            if($hasmultimedia){
+                $this->searchTermsArr["hasmultimedia"] = true;
             }
         }
 		$latLongArr = Array();

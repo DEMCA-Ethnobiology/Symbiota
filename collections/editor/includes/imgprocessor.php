@@ -1,25 +1,24 @@
-<script>
-$(function() {
-	$( "#zoomInfoDialog" ).dialog({
-		autoOpen: false,
-		position: { my: "left top", at: "right bottom", of: "#zoomInfoDiv" }
-	});
-	
-	$( "#zoomInfoDiv" ).click(function() {
-		$( "#zoomInfoDialog" ).dialog( "open" );
-	});
-});
-</script>
+<link href="<?php echo $CLIENT_ROOT; ?>/css/mag.css" type="text/css" rel="stylesheet" />
+<link href="<?php echo $CLIENT_ROOT; ?>/css/mag-theme-default.css" type="text/css" rel="stylesheet" />
+<style type="text/css">
+    .img-thumbnail {
+        display: inline-block;
+        max-width: 100%;
+        height: auto;
+        padding: 4px;
+        line-height: 1.42857143;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        -webkit-transition: all .2s ease-in-out;
+        -o-transition: all .2s ease-in-out;
+        transition: all .2s ease-in-out;
+    }
+</style>
 <div style="width:100%;height:1050px;">
 	<fieldset style="height:95%;background-color:white;">
 		<legend><b>Label Processing</b></legend>
 		<div style="margin-top:-10px;height:15px;position:relative">
-			<div style="float:left;padding-top:3px"><a id="zoomInfoDiv" href="#">Zoom?</a></div>
-			<div id="zoomInfoDialog">
-				Hold down control button and click on the image to quick zoom into specific location
-				or hold down the shift button and hold a left-click while moving the mouse up or down for a more controlled zoom action.
-				Click and drag bottom right corner of image to resize display panel.  
-			</div>
 			<div style="float:right;padding:0px 3px;margin:0px 3px;"><input id="imgreslg" name="resradio" type="radio" onchange="changeImgRes('lg')" />High Res.</div>
 			<div style="float:right;padding:0px 3px;margin:0px 3px;"><input id="imgresmed" name="resradio"  type="radio" checked onchange="changeImgRes('med')" />Med Res.</div>
 			<?php
@@ -34,13 +33,42 @@ $(function() {
 			<?php
 			$imgCnt = 1;
 			foreach($imgArr as $imgCnt => $iArr){
-				$iUrl = $iArr['web'];
+				$cssText = 'height:400px;width:auto;';
+			    $iUrl = $iArr['web'];
+                $iLgUrl = (array_key_exists('lg',$iArr)?$iArr['lg']:$iArr['web']);
 				$imgId = $iArr['imgid'];
+                $sizeArr = array();
+				if(file_exists($iLgUrl)){
+                    $sizeArr = (getimagesize($iLgUrl)?getimagesize($iLgUrl):array());
+                }
+				if(array_key_exists('0',$sizeArr)) {
+				    if($sizeArr['0'] > $sizeArr['1']) {
+                        $cssText = 'height:auto;width:400px;';
+                    }
+                }
 				?>
 				<div id="labeldiv-<?php echo $imgCnt; ?>" style="display:<?php echo ($imgCnt==1?'block':'none'); ?>;">
-					<div>
-						<img id="activeimg-<?php echo $imgCnt; ?>" src="<?php echo $iUrl; ?>" style="width:400px;height:400px" />
-					</div>
+                    <script type="text/javascript">
+                        $(document).ready(function() {
+                            $host<?php echo $imgCnt; ?> = $('[mag-thumb="inner-inline-<?php echo $imgCnt; ?>"]');
+                            $host<?php echo $imgCnt; ?>.mag({
+                                position: 'drag',
+                                initial: {
+                                    zoom: 0
+                                }
+                            });
+                        });
+                    </script>
+                    <div style="height:400px;">
+                        <div>
+                            <div mag-thumb="inner-inline-<?php echo $imgCnt; ?>" mag-flow="inline" class="mag-eg-el">
+                                <img id="activeimg-<?php echo $imgCnt; ?>" src="<?php echo $iUrl; ?>" style="<?php echo $cssText; ?>" />
+                            </div>
+                            <div mag-zoom="inner-inline-<?php echo $imgCnt; ?>" mag-flow="inline" class="mag-eg-el">
+                                <img src="<?php echo $iLgUrl; ?>" style="<?php echo $cssText; ?>" />
+                            </div>
+                        </div>
+                    </div>
 					<?php 
 					if(array_key_exists('error', $iArr)){
 						echo '<div style="font-weight:bold;color:red">'.$iArr['error'].'</div>';
@@ -181,7 +209,17 @@ $(function() {
 							?>
 						</div>
 					</div>
-				</div>
+                </div>
+                <script>
+                    var evt<?php echo $imgCnt; ?> = new Event(),
+                        m<?php echo $imgCnt; ?> = new Magnifier(evt<?php echo $imgCnt; ?>);
+
+                    m<?php echo $imgCnt; ?>.attach({
+                        thumb: '#activeimg-<?php echo $imgCnt; ?>',
+                        large: '<?php echo $iLgUrl; ?>',
+                        zoom: 3
+                    });
+                </script>
 				<?php
 				$imgCnt++;
 			}
@@ -189,3 +227,9 @@ $(function() {
 		</div>
 	</fieldset>
 </div>
+<script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/jquery.bridget.js"></script>
+<script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/jquery.mousewheel.js"></script>
+<script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/jquery.event.drag.js"></script>
+<script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/mag.js"></script>
+<script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/mag-jquery.js"></script>
+<script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/mag-control.js"></script>
