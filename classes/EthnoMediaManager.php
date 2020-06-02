@@ -55,7 +55,9 @@ class EthnoMediaManager {
         if(substr($this->targetPath,-1) !== '/') $this->targetPath .= '/';
         $this->targetPath .= 'content/media/';
         if(!file_exists($this->targetPath.$this->collid)){
-            mkdir($this->targetPath.$this->collid, 0775);
+            if (!mkdir($concurrentDirectory = $this->targetPath . $this->collid, 0775) && !is_dir($concurrentDirectory)) {
+                throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+            }
         }
         $this->targetPath .= $this->collid.'/';
     }
@@ -163,7 +165,7 @@ class EthnoMediaManager {
         while ($r = $rs->fetch_object()){
             $retArr['url'] = $r->url;
             $retArr['description'] = $r->description;
-            $retArr['eaffile'] = $r->collid.'/'.$r->eaffile;
+            $retArr['eaffile'] = $r->eaffile;
             $retArr['displaySettings'] = $r->displaySettings;
         }
         return $retArr;
@@ -269,10 +271,11 @@ class EthnoMediaManager {
     }
 
     private function databaseFile(){
+        $filePath = '/content/media/' . $this->collid . '/';
         $valueStr = 'VALUES ('.$this->collid.',';
         $valueStr .= '"'.$this->cleanInStr($_POST['mp3url']).'",';
         $valueStr .= '"'.$this->cleanInStr($_POST['description']).'",';
-        $valueStr .= '"'.$this->fileName.'") ';
+        $valueStr .= '"'.$filePath.$this->fileName.'") ';
         $sql = 'INSERT INTO ethnomedia(collid,url,description,eaffile) '.$valueStr;
         if($this->conn->query($sql)){
             $this->mediaid = $this->conn->insert_id;

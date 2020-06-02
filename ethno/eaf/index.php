@@ -38,7 +38,7 @@ if($action === 'Upload EAF'){
     $eafManager->setMediaid($mediaid);
     $eafArr = $eafManager->getEAFInfoArr();
     $eaf_file = $eafArr['eaffile'];
-    $file_path = $SERVER_ROOT.'/content/media/'.$eaf_file;
+    $file_path = $SERVER_ROOT.$eaf_file;
     if(@simplexml_load_file($file_path)){
         header('Location: eafedit.php?mediaid='.$mediaid.'&collid='.$collid);
     }

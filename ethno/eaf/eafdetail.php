@@ -50,7 +50,7 @@ if($eafArr){
     $player_title = $eafArr['description'];
     $start_at_time = 0;
     $start_at_time_end = 0;
-    $file_path = $SERVER_ROOT.'/content/media/'.$eaf_file;
+    $file_path = $SERVER_ROOT.$eaf_file;
     if(file_exists($file_path)){
         $xml = simplexml_load_string(file_get_contents($file_path));
     }
@@ -87,7 +87,7 @@ if($xml){
     }
     foreach ($xml->TIER as $a_tier){
         $tierID = trim(stripslashes((string)$a_tier['TIER_ID']));
-        if($tierID && array_key_exists($tierID,$tSettingArr)){
+        if($tierID){
             $spkr = '';
             $participant = trim(stripslashes((string)$a_tier['PARTICIPANT']));
             $speaker = ($participant?$participant:$tierID);
@@ -106,8 +106,14 @@ if($xml){
                 $line_value = str_replace("&lt;","<",$line_value);
                 $line_value = str_replace("&gt;",">",$line_value);
                 if($line_ref){
-                    $tierDataArr[$tierID]['display'] = $tSettingArr[$tierID]['display'];
-                    $tierDataArr[$tierID]['color'] = ($tSettingArr?$tSettingArr[$tierID]['color']:'');
+                    if(array_key_exists($tierID,$tSettingArr)){
+                        $tierDataArr[$tierID]['display'] = $tSettingArr[$tierID]['display'];
+                        $tierDataArr[$tierID]['color'] = ($tSettingArr?$tSettingArr[$tierID]['color']:'');
+                    }
+                    else{
+                        $tierDataArr[$tierID]['display'] = 'bottom';
+                        $tierDataArr[$tierID]['color'] = '';
+                    }
                     $tierDataArr[$tierID]['lines'][$line_id]['lineref'] = $line_ref;
                     $tierDataArr[$tierID]['lines'][$line_id]['start'] = ($lineTimeArr[$line_ref]['start']>1?($time_slot_array[$lineTimeArr[$line_ref]['start']-1]/1000):0);
                     $tierDataArr[$tierID]['lines'][$line_id]['stop'] = ($time_slot_array[$lineTimeArr[$line_ref]['stop']-1]/1000);
@@ -268,23 +274,27 @@ if($xml){
             setColors();
             setData();
             for(pid in tierArr){
-                var showSpeaker = false;
-                var tiers = tierArr[pid].tiers;
-                for(tid in tiers){
-                    if(tierShowArr.indexOf(tid) === -1){
-                        if(dataArr[tid]){
-                            var display = dataArr[tid].display;
-                            if(display !== 'nodisplay'){
-                                showSpeaker = true;
-                                tierShowArr.push(tid);
+                if(tierArr.hasOwnProperty(pid)){
+                    var showSpeaker = false;
+                    var tiers = tierArr[pid].tiers;
+                    for(tid in tiers){
+                        if(tiers.hasOwnProperty(tid)){
+                            if(tierShowArr.indexOf(tid) === -1){
+                                if(dataArr[tid]){
+                                    var display = dataArr[tid].display;
+                                    if(display !== 'nodisplay'){
+                                        showSpeaker = true;
+                                        tierShowArr.push(tid);
+                                    }
+                                }
                             }
                         }
                     }
-                }
-                if(speakerShowArr.indexOf(pid) === -1 && showSpeaker){
-                    speakerShowArr.push(pid);
-                    var checkboxId = 'check-tier-'+pid;
-                    document.getElementById(checkboxId).checked = true;
+                    if(speakerShowArr.indexOf(pid) === -1 && showSpeaker){
+                        speakerShowArr.push(pid);
+                        var checkboxId = 'check-tier-'+pid;
+                        document.getElementById(checkboxId).checked = true;
+                    }
                 }
             }
             setTranscriptionBox();
@@ -660,10 +670,10 @@ else{
                                     else $display = $tSettingArr[$name]['display'];
                                     echo "<div style='clear:both;margin-left:20px;display:flex;align-items:center;'>";
                                     echo "<input type='checkbox' style='margin-right:8px;' class='check-tier' name='check-tier-".$tierId."' id='checkbox-".$subtierId."' onchange='changeTierCheck(\"".$tierId."\");toggleTier(\"".$subtierId."\");' value='".$name."' ".($display!=='nodisplay'?'checked':'')."> ";
-                                    echo "<input id='color-".$tierId."' class='color' style='cursor:pointer;border:1px black solid;height:14px;width:14px;font-size:0px;margin-right:8px;' value='".$color."' onchange='changeTierColor(this.value,\"".$tierId."\",\"".$subtierId."\");' /> ";
+                                    echo "<input id='color-".$subtierId."' class='color' style='cursor:pointer;border:1px black solid;height:14px;width:14px;font-size:0px;margin-right:8px;' value='".$color."' onchange='changeTierColor(this.value,\"".$tierId."\",\"".$subtierId."\");' /> ";
                                     echo "<span id='key-".$subtierId."' class='spkr_key' style='color:#".$color.";margin-right:8px;'>".$code."</span><span style='margin-right:8px;'>&middot;</span>";
                                     echo "<span class='spkr_name' style='margin-right:8px;'>".$name.(($name == $tierId)?' (transcription)':'')."</span>";
-                                    echo '<select id="'.$name.'-display" style="margin-left:10px;" onchange="changeTierPlacement(\''.$subtierId.'\');">';
+                                    echo '<select id="'.$subtierId.'-display" style="margin-left:10px;" onchange="changeTierPlacement(\''.$subtierId.'\');">';
                                     echo "<option value='top' ".($display!=='bottom'?'selected':'')." >One-line display</option>";
                                     echo "<option value='bottom' ".($display==='bottom'?'selected':'')." >Scrolling</option>";
                                     echo "</select>";

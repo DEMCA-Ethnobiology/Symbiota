@@ -13,7 +13,7 @@ if($action === 'Upload EAF'){
     $ethnoMediaManager->setMediaid($mediaid);
     $eafArr = $ethnoMediaManager->getEAFInfoArr();
     $eaf_file = $eafArr['eaffile'];
-    $file_path = $SERVER_ROOT.'/content/media/'.$eaf_file;
+    $file_path = $SERVER_ROOT.$eaf_file;
     if(@simplexml_load_file($file_path)){
         header('Location: ../../ethno/eaf/eafedit.php?mediaid='.$mediaid.'&collid='.$collId.'&occid='.$occId.'&occindex='.$occIndex.'&csmode='.$crowdSourceMode);
     }

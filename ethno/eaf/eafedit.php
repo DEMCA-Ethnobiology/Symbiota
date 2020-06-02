@@ -69,7 +69,7 @@ if($eafArr){
     $start_at_time = 0;
     $start_at_time_end = 0;
     $specific_start_line_id = "x0";
-    $file_path = $SERVER_ROOT.'/content/media/'.$eaf_file;
+    $file_path = $SERVER_ROOT.$eaf_file;
     if(file_exists($file_path)){
         $xml = simplexml_load_file($file_path);
     }
