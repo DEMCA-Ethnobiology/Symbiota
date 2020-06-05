@@ -167,32 +167,28 @@ $projLangList = $ethnoManager->getLangNameDropDownList($collid);
             var countryVal = document.getElementById("country").value;
             var stateVal = document.getElementById("stateProvince").value;
             if(communityName && countryVal && stateVal){
-                if(isNaN(verifyCommunityName(communityName,id))){
-                    document.getElementById("addeditformaction").value = action;
-                    document.addeditcommunityform.submit();
-                }
-                else{
-                    alert('Community already exists in database.');
-                }
+                var http = new XMLHttpRequest();
+                var url = "rpc/checkcommunityname.php";
+                var params = '?name='+name+'&id='+id;
+                //console.log(url+'?'+params);
+                http.open("POST", url, true);
+                http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                http.onreadystatechange = function() {
+                    if(http.readyState == 4 && http.status == 200) {
+                        if(Number(http.responseText) == 0){
+                            document.getElementById("addeditformaction").value = action;
+                            document.addeditcommunityform.submit();
+                        }
+                        else{
+                            alert('Community already exists in database.');
+                        }
+                    }
+                };
+                http.send(params);
             }
             else{
                 alert('Please enter values for community name, country, and state/province.');
             }
-        }
-
-        function verifyCommunityName(name,id){
-            var http = new XMLHttpRequest();
-            var url = "rpc/checkcommunityname.php";
-            var params = '?name='+name+'&id='+id;
-            //console.log(url+'?'+params);
-            http.open("POST", url, true);
-            http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-            http.onreadystatechange = function() {
-                if(http.readyState == 4 && http.status == 200) {
-                    return http.responseText;
-                }
-            };
-            http.send(params);
         }
 
         function verifyAddLanguage(commid){
@@ -203,21 +199,32 @@ $projLangList = $ethnoManager->getLangNameDropDownList($collid);
             var stateVal = document.getElementById("stateProvince").value;
             if(!commid){
                 if(communityName && countryVal && stateVal){
-                    if(isNaN(verifyCommunityName(communityName,''))){
-                        if(langID && prevVal){
-                            document.getElementById("linklangformaction").value = 'Add language';
-                            document.addeditcommunityform.action = 'editcommunity.php';
-                            document.addeditcommunityform.submit();
+                    var http = new XMLHttpRequest();
+                    var url = "rpc/checkcommunityname.php";
+                    var params = '?name='+name+'&id='+id;
+                    //console.log(url+'?'+params);
+                    http.open("POST", url, true);
+                    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                    http.onreadystatechange = function() {
+                        if(http.readyState == 4 && http.status == 200) {
+                            if(Number(http.responseText) == 0){
+                                if(langID && prevVal){
+                                    document.getElementById("linklangformaction").value = 'Add language';
+                                    document.addeditcommunityform.action = 'editcommunity.php';
+                                    document.addeditcommunityform.submit();
+                                }
+                                else{
+                                    alert('Please enter a language name and select the prevalence.');
+                                    return false;
+                                }
+                            }
+                            else{
+                                alert('Community already exists in database.');
+                                return false;
+                            }
                         }
-                        else{
-                            alert('Please enter a language name and select the prevalence.');
-                            return false;
-                        }
-                    }
-                    else{
-                        alert('Community already exists in database.');
-                        return false;
-                    }
+                    };
+                    http.send(params);
                 }
                 else{
                     alert('Please enter values for community name, country, and state/province.');
@@ -415,7 +422,7 @@ echo '</div>';
                         ?>
                     </form>
                 </fieldset>
-                <fieldset style="padding:10px;margin-top:12px;width:475px;float:right;clear:right;">
+                <fieldset style="padding:10px;margin-top:12px;width:350px;float:right;clear:right;">
                     <legend><b>Language</b></legend>
                     <?php
                     if($langArr){
@@ -427,7 +434,7 @@ echo '</div>';
                     }
                     ?>
                     <div id="addLanguageDiv" style="display:<?php echo ($langArr?'none':'block'); ?>;">
-                        <fieldset style="padding:10px;width:400px;float:left;">
+                        <fieldset style="padding:10px;width:340px;float:left;">
                             <form name="linklanguageform" action="editcommunity.php" method="post" onsubmit="">
                                 <legend><b>Link Language to Community</b></legend>
                                 <div style="width:100%;margin: 10px 0;clear:both;">

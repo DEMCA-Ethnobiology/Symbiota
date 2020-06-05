@@ -577,8 +577,8 @@ echo '</div>';
                             </table>
                         </fieldset>
                     </fieldset>
-                    <fieldset style="width:475px;float:right;clear:right;border: 0;">
-                        <fieldset style="padding:10px;margin-top:12px;width:460px;margin-left:auto;margin-right:auto;">
+                    <fieldset style="width:400px;float:right;clear:right;border: 0;">
+                        <fieldset style="padding:10px;margin-top:12px;width:400px;margin-left:auto;margin-right:auto;">
                             <legend><b>Roles</b></legend>
                             <?php
                             $roles = array();
@@ -588,18 +588,18 @@ echo '</div>';
                             }
                             ?>
                             <div style="width:100%;margin: 10px 0;clear:both;">
-                                Comments: <input type="text" name="personnelRoleComments" size="60" value="<?php echo (isset($linkArr['rolecomments'])?$linkArr['rolecomments']:''); ?>" title="" />
+                                Comments: <input type="text" name="personnelRoleComments" size="40" value="<?php echo (isset($linkArr['rolecomments'])?$linkArr['rolecomments']:''); ?>" title="" />
                             </div>
                         </fieldset>
-                        <fieldset style="padding:10px;margin-top:12px;width:460px;margin-left:auto;margin-right:auto;">
+                        <fieldset style="padding:10px;margin-top:12px;width:400px;margin-left:auto;margin-right:auto;">
                             <legend><b>Project Code</b></legend>
-                            <table style="table-layout:fixed;width:460px;">
+                            <table style="table-layout:fixed;width:400px;">
                                 <tr>
                                     <td style="width:175px;font-size:14px;">
                                         Project code:
                                     </td>
                                     <td style="font-size:14px;">
-                                        <input type="text" id="projectCode" name="projectCode" size="43" value="<?php echo (isset($linkArr['projectCode'])?$linkArr['projectCode']:''); ?>" title="" />
+                                        <input type="text" id="projectCode" name="projectCode" size="25" value="<?php echo (isset($linkArr['projectCode'])?$linkArr['projectCode']:''); ?>" title="" />
                                     </td>
                                 </tr>
                                 <tr>
