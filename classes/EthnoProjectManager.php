@@ -442,8 +442,8 @@ class EthnoProjectManager {
         $valueStr .= ($this->cleanInStr($pArr['languagecomments'])?'"'.$this->cleanInStr($pArr['languagecomments']).'") ':'null) ');
         $sql = 'INSERT INTO ethnocommunity(communityname,country,stateProvince,county,municipality,decimalLatitude,'.
             'decimalLongitude,elevationInMeters,languagecomments) '.$valueStr;
-        echo $sql;exit;
         if($this->conn->query($sql)){
+            echo $sql;
             $this->comid = $this->conn->insert_id;
         }
     }
