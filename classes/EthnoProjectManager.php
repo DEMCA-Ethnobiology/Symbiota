@@ -10,7 +10,7 @@ class EthnoProjectManager {
     private $comid;
 
     public function __construct(){
-        $this->conn = MySQLiConnectionFactory::getCon("readonly");
+        $this->conn = MySQLiConnectionFactory::getCon("write");
     }
 
     public function __destruct(){
@@ -442,8 +442,7 @@ class EthnoProjectManager {
         $valueStr .= ($this->cleanInStr($pArr['languagecomments'])?'"'.$this->cleanInStr($pArr['languagecomments']).'") ':'null) ');
         $sql = 'INSERT INTO ethnocommunity(communityname,country,stateProvince,county,municipality,decimalLatitude,'.
             'decimalLongitude,elevationInMeters,languagecomments) '.$valueStr;
-        $this->conn->query($sql);
-        if($this->conn->insert_id){
+        if($this->conn->query($sql)){
             $this->comid = $this->conn->insert_id;
         }
     }
