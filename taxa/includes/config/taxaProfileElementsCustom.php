@@ -17,6 +17,9 @@ $descriptionText = 'There is currently no description for this taxon.';
 $vernacularNameText = 'There are currently no vernacular names for this taxon.';
 $vernacularUseText = 'There are currently no vernacular uses for this taxon.';
 $multimediaText = 'There are currently no multimedia records associated with this taxon.';
+$nameSummaryText = 'There are currently no name summary for this taxon.';
+$nameAnalysisText = 'There are currently no name analysis for this taxon.';
+$publicCommentsText = 'There are currently no public comments for this taxon.';
 if($SYMB_UID){
     if($IS_ADMIN){
         $isCollAdmin = true;
@@ -42,7 +45,7 @@ foreach($descArr as $dArr){
             }
             unset($dArr[$id]);
         }
-        if($vArr["caption"] === 'Vernacular name'){
+        if($vArr["caption"] === 'Vernacular names'){
             $vernacularNameText = '';
             $stArr = $vArr["desc"];
             foreach($stArr as $tdsId => $stmt){
@@ -52,13 +55,33 @@ foreach($descArr as $dArr){
             }
             unset($dArr[$id]);
         }
-        if($vArr["caption"] === 'Vernacular use'){
+        if($vArr["caption"] === 'Vernacular uses'){
             $vernacularUseText = '';
             $stArr = $vArr["desc"];
             foreach($stArr as $tdsId => $stmt){
                 $vernacularUseText .= "<div style='margin-bottom:15px;'>";
                 $vernacularUseText .= $stmt." ";
                 $vernacularUseText .= "</div>";
+            }
+            unset($dArr[$id]);
+        }
+        if($vArr["caption"] === 'Plant names summary'){
+            $nameSummaryText = '';
+            $stArr = $vArr["desc"];
+            foreach($stArr as $tdsId => $stmt){
+                $nameSummaryText .= "<div style='margin-bottom:15px;'>";
+                $nameSummaryText .= $stmt." ";
+                $nameSummaryText .= "</div>";
+            }
+            unset($dArr[$id]);
+        }
+        if($vArr["caption"] === 'Plant names analysis'){
+            $nameAnalysisText = '';
+            $stArr = $vArr["desc"];
+            foreach($stArr as $tdsId => $stmt){
+                $nameAnalysisText .= "<div style='margin-bottom:15px;'>";
+                $nameAnalysisText .= $stmt." ";
+                $nameAnalysisText .= "</div>";
             }
             unset($dArr[$id]);
         }
@@ -70,15 +93,18 @@ foreach($descArr as $dArr){
     <ul class="ui-tabs-nav">
         <?php
         echo '<li><a href="#defaultdesctab">Description</a></li>';
-        echo '<li><a href="#ethnonametab">Vernacular name</a></li>';
-        echo '<li><a href="#ethnousetab">Vernacular use</a></li>';
+        echo '<li><a href="#ethnonametab">Vernacular names</a></li>';
+        echo '<li><a href="#ethnousetab">Vernacular uses</a></li>';
         echo '<li><a href="#ethnomediatab">Multimedia</a></li>';
+        echo '<li><a href="#ethnonamesummarytab">Plant names summary</a></li>';
+        echo '<li><a href="#ethnonameanalysistab">Plant names analysis</a></li>';
+        echo '<li><a href="#publiccomments">Public comments</a></li>';
         if($descArr){
             $capCnt = 1;
             foreach($descArr as $dArr){
                 foreach($dArr as $id => $vArr){
                     $cap = $vArr["caption"];
-                    if($cap !== 'Description' && $cap !== 'Vernacular name' && $cap !== 'Vernacular use' && $cap !== 'Multimedia'){
+                    if($cap !== 'Description' && $cap !== 'Vernacular names' && $cap !== 'Vernacular uses' && $cap !== 'Multimedia' && $cap !== 'Plant names summary' && $cap !== 'Plant names analysis'){
                         if(!$cap){
                             $cap = 'Description #'.$capCnt;
                             $capCnt++;
@@ -142,12 +168,21 @@ foreach($descArr as $dArr){
         }
         ?>
     </div>
+    <div id="ethnonamesummarytab" style="height:330px;width:94%;overflow:auto;">
+        <?php echo $nameSummaryText; ?>
+    </div>
+    <div id="ethnonameanalysistab" style="height:330px;width:94%;overflow:auto;">
+        <?php echo $nameAnalysisText; ?>
+    </div>
+    <div id="publiccomments" style="height:330px;width:94%;overflow:auto;">
+        <?php echo $publicCommentsText; ?>
+    </div>
     <?php
     if($descArr){
         foreach($descArr as $dArr){
             foreach($dArr as $id => $vArr){
                 $cap = $vArr["caption"];
-                if($cap !== 'Description' && $cap !== 'Vernacular name' && $cap !== 'Vernacular use' && $cap !== 'Multimedia'){
+                if($cap !== 'Description' && $cap !== 'Vernacular names' && $cap !== 'Vernacular uses' && $cap !== 'Multimedia' && $cap !== 'Plant names summary' && $cap !== 'Plant names analysis'){
                     ?>
                     <div id="tab<?php echo $id; ?>" style="height:330px;width:94%;overflow:auto;">
                         <?php
