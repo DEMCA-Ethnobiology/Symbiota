@@ -17,7 +17,6 @@ $closeWindow = false;
 $statusStr = '';
 $comArr = array();
 $langArr = array();
-echo json_encode($_POST);
 if($action == 'Create Community'){
     $ethnoManager->createCommunity($_POST);
     $comId = $ethnoManager->getComid();
