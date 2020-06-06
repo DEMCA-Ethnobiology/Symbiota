@@ -14,7 +14,7 @@ $clManager = new ChecklistAdmin();
 if(!$clid && isset($_POST['delclid'])) $clid = $_POST['delclid'];
 $clManager->setClid($clid);
 
-if($action == "SubmitAdd"){
+if($IS_ADMIN && $action == "SubmitAdd"){
 	//Anyone with a login can create a checklist
 	$newClid = $clManager->createChecklist($_POST);
 	header("Location: checklist.php?cl=".$newClid."&emode=1");
