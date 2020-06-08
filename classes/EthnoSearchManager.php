@@ -28,24 +28,7 @@ class EthnoSearchManager {
     }
 
     private function readRequestVariables(){
-        if(array_key_exists('clid',$_REQUEST)){
-            $clidIn = $_REQUEST['clid'];
-            $clidStr = '';
-            if(is_string($clidIn)){
-                if(is_numeric($clidIn)){
-                    $clidStr = $this->cleanInputStr($clidIn);
-                }
-            }
-            else{
-                $clidStr = $this->cleanInputStr(implode(',',array_unique($clidIn)));
-            }
-            $this->searchTermsArr["clid"] = $clidStr;
-            $domainName = $_SERVER['HTTP_HOST'];
-            if(!$domainName) {
-                $domainName = $_SERVER['SERVER_NAME'];
-            }
-        }
-        elseif(array_key_exists("db",$_REQUEST)){
+        if(array_key_exists("db",$_REQUEST)){
             $dbStr = '';
             $dbs = $_REQUEST["db"];
             if(is_string($dbs)){
@@ -678,10 +661,7 @@ class EthnoSearchManager {
 
     public function getSqlWhere(){
         $sqlWhere = "";
-        if(array_key_exists('clid',$this->searchTermsArr) && is_numeric($this->searchTermsArr['clid'])){
-            $sqlWhere .= "AND (v.clid IN(".$this->searchTermsArr['clid'].")) ";
-        }
-        elseif(array_key_exists("db",$this->searchTermsArr) && $this->searchTermsArr['db']){
+        if(array_key_exists("db",$this->searchTermsArr) && $this->searchTermsArr['db']){
             //Do nothing if db = all
             if($this->searchTermsArr['db'] !== 'all'){
                 if($this->searchTermsArr['db'] === 'allspec'){

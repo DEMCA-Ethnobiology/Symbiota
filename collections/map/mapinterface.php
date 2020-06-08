@@ -133,6 +133,9 @@ if($mapType && $mapType == 'taxa'){
     $tArr = $taxaMapManager->getTaxaArr();
 }
 elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
+    if($dbArr && $stArr){
+        $stArr['db'] = $dbArr;
+    }
     if(!$ETHNO_ACTIVE){
         if($stArr){
             $mapManager->setSearchTermsArr($stArr);
