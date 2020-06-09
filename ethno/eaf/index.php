@@ -191,7 +191,7 @@ else{
             <form name="collselectform" action="index.php" method="post" onsubmit="">
                 <div style="padding-top:8px;width:780px;margin: 0 auto 10px auto;clear:both;display:flex;align-items:center;">
                     Collection/Project:
-                    <select style='margin-left:10px;' name="collid" id="collectionSelect" onChange="this.form.submit();">
+                    <select style='margin-left:10px;width:600px;' name="collid" id="collectionSelect" onChange="this.form.submit();">
                         <option value="0">All collections/projects</option>
                         <?php
                         foreach ($collArr as $k => $v) {

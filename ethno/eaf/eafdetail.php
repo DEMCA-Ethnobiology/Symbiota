@@ -291,9 +291,11 @@ if($xml){
                         }
                     }
                     if(speakerShowArr.indexOf(pid) === -1 && showSpeaker){
-                        speakerShowArr.push(pid);
                         var checkboxId = 'check-tier-'+pid;
-                        document.getElementById(checkboxId).checked = true;
+                        if(document.getElementById(checkboxId)){
+                            speakerShowArr.push(pid);
+                            document.getElementById(checkboxId).checked = true;
+                        }
                     }
                 }
             }
