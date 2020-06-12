@@ -294,7 +294,7 @@ echo '</div>';
                                     </a>
                                 </td>
                                 <td>
-                                    <input type="text" id="communityName" name="communityName" size="43" value="<?php echo (isset($comArr['communityname'])?$comArr['communityname']:''); ?>" title="" autocomplete="off" />
+                                    <input type="text" id="communityName" name="communityName" size="43" value="<?php echo (isset($comArr['communityname'])?$comArr['communityname']:''); ?>" autocomplete="off" />
                                     <div id="comminfodialog">
 
                                     </div>
@@ -305,7 +305,7 @@ echo '</div>';
                                     Country:
                                 </td>
                                 <td>
-                                    <input type="text" id="country" name="country" size="43" value="<?php echo (isset($comArr['country'])?$comArr['country']:''); ?>" title="" autocomplete="off" />
+                                    <input type="text" id="country" name="country" size="43" value="<?php echo (isset($comArr['country'])?$comArr['country']:''); ?>" autocomplete="off" />
                                 </td>
                             </tr>
                             <tr>
@@ -313,7 +313,7 @@ echo '</div>';
                                     State/Province:
                                 </td>
                                 <td>
-                                    <input type="text" id="stateProvince" name="stateProvince" size="43" value="<?php echo (isset($comArr['stateProvince'])?$comArr['stateProvince']:''); ?>" title="" autocomplete="off" />
+                                    <input type="text" id="stateProvince" name="stateProvince" size="43" value="<?php echo (isset($comArr['stateProvince'])?$comArr['stateProvince']:''); ?>" autocomplete="off" />
                                 </td>
                             </tr>
                             <tr>
@@ -324,7 +324,7 @@ echo '</div>';
                                     </a>
                                 </td>
                                 <td>
-                                    <input type="text" id="county" name="county" size="43" value="<?php echo (isset($comArr['county'])?$comArr['county']:''); ?>" title="" autocomplete="off" />
+                                    <input type="text" id="county" name="county" size="43" value="<?php echo (isset($comArr['county'])?$comArr['county']:''); ?>" autocomplete="off" />
                                     <div id="countyinfodialog">
 
                                     </div>
@@ -338,7 +338,7 @@ echo '</div>';
                                     </a>
                                 </td>
                                 <td>
-                                    <input type="text" id="municipality" name="municipality" size="43" value="<?php echo (isset($comArr['municipality'])?$comArr['municipality']:''); ?>" title="" autocomplete="off" />
+                                    <input type="text" id="municipality" name="municipality" size="43" value="<?php echo (isset($comArr['municipality'])?$comArr['municipality']:''); ?>" autocomplete="off" />
                                     <div id="municipalityinfodialog">
 
                                     </div>
@@ -355,7 +355,7 @@ echo '</div>';
                                     </a>
                                 </td>
                                 <td>
-                                    <input type="text" id="decimalLatitude" name="decimalLatitude" size="43" value="<?php echo (isset($comArr['decimalLatitude'])?$comArr['decimalLatitude']:''); ?>" title="" autocomplete="off" />
+                                    <input type="text" id="decimalLatitude" name="decimalLatitude" size="43" value="<?php echo (isset($comArr['decimalLatitude'])?$comArr['decimalLatitude']:''); ?>" autocomplete="off" />
                                     <div id="declatinfodialog">
 
                                     </div>
@@ -369,7 +369,7 @@ echo '</div>';
                                     </a>
                                 </td>
                                 <td>
-                                    <input type="text" id="decimalLongitude" name="decimalLongitude" size="43" value="<?php echo (isset($comArr['decimalLongitude'])?$comArr['decimalLongitude']:''); ?>" title="" autocomplete="off" />
+                                    <input type="text" id="decimalLongitude" name="decimalLongitude" size="43" value="<?php echo (isset($comArr['decimalLongitude'])?$comArr['decimalLongitude']:''); ?>" autocomplete="off" />
                                     <div id="declonginfodialog">
 
                                     </div>
@@ -380,7 +380,7 @@ echo '</div>';
                                     Elevation (meters):
                                 </td>
                                 <td>
-                                    <input type="text" id="elevationInMeters" name="elevationInMeters" size="43" value="<?php echo (isset($comArr['elevationInMeters'])?$comArr['elevationInMeters']:''); ?>" title="" autocomplete="off" />
+                                    <input type="text" id="elevationInMeters" name="elevationInMeters" size="43" value="<?php echo (isset($comArr['elevationInMeters'])?$comArr['elevationInMeters']:''); ?>" autocomplete="off" />
                                 </td>
                             </tr>
                             <tr>
@@ -452,8 +452,10 @@ echo '</div>';
                                     <select id="addLangPrevalence" name="addLangPrevalence" onchange="">
                                         <option value='' >--------</option>
                                         <option value='Primary'>Primary</option>
+                                        <option value='Secondary'>Secondary</option>
                                         <option value='Regional'>Regional</option>
                                         <option value='Immigrant'>Immigrant</option>
+                                        <option value='Temporary visitor'>Temporary visitor</option>
                                     </select>
                                 </div>
                                 <div style="clear:both;float:right;">

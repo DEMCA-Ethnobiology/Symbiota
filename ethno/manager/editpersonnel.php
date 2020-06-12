@@ -609,9 +609,9 @@ echo '</div>';
                                     <td style="font-size:14px;">
                                         <select id="defaultDisplay" name="defaultDisplay" onchange="">
                                             <option value='' >------------</option>
-                                            <option value='name' <?php echo ((isset($linkArr['sex']) && $linkArr['defaultdisplay'] === 'name')?'selected':''); ?> >Name</option>
-                                            <option value='project' <?php echo ((isset($linkArr['sex']) && $linkArr['defaultdisplay'] === 'project')?'selected':''); ?> >Project code</option>
-                                            <option value='random' <?php echo ((isset($linkArr['sex']) && $linkArr['defaultdisplay'] === 'random')?'selected':''); ?> >Random Code</option>
+                                            <option value='name' <?php echo ((isset($linkArr['defaultdisplay']) && $linkArr['defaultdisplay'] === 'name')?'selected':''); ?> >Name</option>
+                                            <option value='project' <?php echo ((isset($linkArr['defaultdisplay']) && $linkArr['defaultdisplay'] === 'project')?'selected':''); ?> >Project code</option>
+                                            <option value='random' <?php echo ((isset($linkArr['defaultdisplay']) && $linkArr['defaultdisplay'] === 'random')?'selected':''); ?> >Random Code</option>
                                         </select>
                                     </td>
                                 </tr>
