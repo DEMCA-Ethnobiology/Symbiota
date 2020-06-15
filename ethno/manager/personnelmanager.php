@@ -47,8 +47,9 @@ $roleArr = $ethnoManager->getPersonnelRoleArr();
                     <tr>
                         <th style="width:20px;"></th>
                         <th style="width:200px;">Full Name</th>
+                        <th style="width:150px;">Birth Community</th>
                         <th style="width:40px;">Project Code</th>
-                        <th style="width:500px;">Roles</th>
+                        <th style="width:350px;">Roles</th>
                     </tr>
                 <?php
                 foreach($personnelArr as $cplId => $pArr){
@@ -68,8 +69,9 @@ $roleArr = $ethnoManager->getPersonnelRoleArr();
                     echo '<td style="width:20px;"><input name="cplid[]" type="checkbox" value="'.$cplId.'" /></td>'."\n";
                     //echo '<td style="width:200px;"><a href="#" onclick="openPersonnelEditor('.$cplId.','.$pArr['pid'].'); return false;">'.$pArr['name'].'</a></td>'."\n";
                     echo '<td style="width:200px;"><a href="editpersonnel.php?cplid='.$cplId.'&collid='.$collid.'&perid='.$pArr['pid'].'">'.$pArr['name'].'</a></td>'."\n";
+                    echo '<td style="width:150px;">'.$pArr['birthCommunity'].'</td>'."\n";
                     echo '<td style="width:40px;">'.$pArr['code'].'</td>'."\n";
-                    echo '<td style="width:500px;">'.$rolesStr.'</td>'."\n";
+                    echo '<td style="width:350px;">'.$rolesStr.'</td>'."\n";
                     echo '</tr>';
                 }
                 ?>

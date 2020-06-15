@@ -90,8 +90,9 @@ class EthnoProjectManager {
 	public function getPersonnelArr(){
 		$retArr = Array();
 		$sql = 'SELECT ecp.ethCollPerLinkID, ecp.projectCode, ecp.rolearr, ecp.rolecomments, ep.ethPerID, '.
-			'CONCAT_WS(" ",ep.title,ep.firstname,ep.lastname) AS fullName '.
+			'CONCAT_WS(" ",ep.title,ep.firstname,ep.lastname) AS fullName, ec.communityname AS birthCommunity '.
             'FROM ethnocollperlink AS ecp LEFT JOIN ethnopersonnel AS ep ON ecp.perID = ep.ethPerID '.
+            'LEFT JOIN ethnocommunity AS ec ON ecp.birthCommunity = ec.ethComID '.
             'WHERE ecp.collID = '.$this->collid.' '.
             'ORDER BY fullName ';
 		//echo '<div>'.$sql.'</div>';
@@ -99,6 +100,7 @@ class EthnoProjectManager {
 		while($row = $rs->fetch_object()){
 			$retArr[$row->ethCollPerLinkID]['pid'] = $row->ethPerID;
             $retArr[$row->ethCollPerLinkID]['code'] = $row->projectCode;
+            $retArr[$row->ethCollPerLinkID]['birthCommunity'] = $row->birthCommunity;
             $retArr[$row->ethCollPerLinkID]['rolearr'] = json_decode($row->rolearr);
             $retArr[$row->ethCollPerLinkID]['rolecomments'] = $row->rolecomments;
             $retArr[$row->ethCollPerLinkID]['name'] = $row->fullName;
