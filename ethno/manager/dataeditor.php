@@ -7,7 +7,9 @@ header("Content-Type: text/html; charset=".$CHARSET);
 $ethnoDataManager = new EthnoDataManager();
 $ethnoProjectManager = new EthnoProjectManager();
 
-if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../ethno/manager/dataeditor.php?collid='.$collId.'&eventid='.$eventId.'&occid='.$occId.'&occindex='.$occIndex.'&csmode='.$csMode.'&dataid='.$dataId);
+if(!$SYMB_UID) {
+    header('Location: ../../profile/index.php?refurl=../ethno/manager/dataeditor.php?collid=' . $collId . '&eventid=' . $eventId . '&occid=' . $occId . '&occindex=' . $occIndex . '&csmode=' . $csMode . '&dataid=' . $dataId);
+}
 
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $eventId = array_key_exists('eventid',$_REQUEST)?$_REQUEST['eventid']:0;
@@ -18,22 +20,46 @@ $csMode = array_key_exists('csmode',$_REQUEST)?$_REQUEST['csmode']:0;
 $tabIndex = array_key_exists("tabtarget",$_REQUEST)?$_REQUEST["tabtarget"]:0;
 $action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
 
+$scinameMatch = array_key_exists("scinameMatch",$_REQUEST);
+$semanticMatch = array_key_exists("semanticMatch",$_REQUEST);
+$levenshteinMatch = array_key_exists("levenshteinMatch",$_REQUEST);
+$levenshteinValue = array_key_exists('levenshteinValue',$_REQUEST)?$_REQUEST['levenshteinValue']:0;
+$vernacularNameMatch = array_key_exists("vernacularNameMatch",$_REQUEST);
+$verbatimParseMatch = array_key_exists("verbatimParseMatch",$_REQUEST);
+$verbatimParseValue = array_key_exists('verbatimParseValue',$_REQUEST)?$_REQUEST['verbatimParseValue']:'';
+$verbatimGlossMatch = array_key_exists("verbatimGlossMatch",$_REQUEST);
+$verbatimGlossValue = array_key_exists('verbatimGlossValue',$_REQUEST)?$_REQUEST['verbatimGlossValue']:'';
+$stringMatch = array_key_exists("stringMatch",$_REQUEST);
+$stringMatchValue = array_key_exists('stringMatchValue',$_REQUEST)?$_REQUEST['stringMatchValue']:'';
+
 //Sanitation
-if($action && !preg_match('/^[a-zA-Z0-9\s_]+$/',$action)) $action = '';
-if(!is_numeric($collId)) $collId = 0;
-if(!is_numeric($tabIndex)) $tabIndex = 0;
+if($action && !preg_match('/^[a-zA-Z0-9\s_]+$/',$action)) {
+    $action = '';
+}
+if(!is_numeric($collId)) {
+    $collId = 0;
+}
+if(!is_numeric($tabIndex)) {
+    $tabIndex = 0;
+}
+
+$linkageSearchReturnArr = array();
 
 if($action === 'Edit Data Record'){
     $ethnoDataManager->saveDataRecordChanges($_POST);
 }
 elseif($action === 'Add Linkage'){
-    $ethnoDataManager->createDataLinkage($_POST);
+    //$ethnoDataManager->createDataLinkage($_POST);
 }
 elseif($action === 'Edit Linkage'){
     $ethnoDataManager->saveDataLinkageChanges($_POST);
 }
 elseif($action === 'Delete Linkage'){
     $ethnoDataManager->deleteDataLinkage($_POST);
+}
+elseif($action === 'Find records'){
+    $ethnoDataManager->prepareLinkageSqlWhere($_POST);
+    $linkageSearchReturnArr = $ethnoDataManager->getLinkageSearchReturn($_POST);;
 }
 
 $ethnoDataManager->setCollid($collId);
@@ -199,18 +225,14 @@ $usePartsArr = $dataArr["partsTags"];
         }
 
         function verifyNameLinkageForm(f){
-            var linkNameVerified = false;
             var linkTypeVerified = false;
             for(var h=0;h<f.length;h++){
                 if(f.elements[h].name === "linktype" && f.elements[h].checked){
                     linkTypeVerified = true;
                 }
-                if(f.elements[h].name === "linknameid" && f.elements[h].value){
-                    linkNameVerified = true;
-                }
             }
-            if(!linkNameVerified || !linkTypeVerified){
-                alert("Please enter a verbatim vernacular name to link and select a link type.");
+            if(!linkTypeVerified){
+                alert("Please select a link type.");
                 return false;
             }
             else{
@@ -339,6 +361,52 @@ $usePartsArr = $dataArr["partsTags"];
             occWindow.focus();
             if (occWindow.opener == null) occWindow.opener = self;
         }
+
+        function verifyLinkageSearchForm(){
+            var scinameMatch = document.getElementById('scinameMatch').checked;
+            var semanticMatch = document.getElementById('semanticMatch').checked;
+            var levenshteinMatch = document.getElementById('levenshteinMatch').checked;
+            var levenshteinValue = document.getElementById('levenshteinValue').value;
+            var vernacularNameMatch = document.getElementById('vernacularNameMatch').checked;
+            var verbatimParseMatch = document.getElementById('verbatimParseMatch').checked;
+            var verbatimParseValue = document.getElementById('verbatimParseValue').value;
+            var verbatimGlossMatch = document.getElementById('verbatimGlossMatch').checked;
+            var verbatimGlossValue = document.getElementById('verbatimGlossValue').value;
+            var stringMatch = document.getElementById('stringMatch').checked;
+            var stringMatchValue = document.getElementById('stringMatchValue').value;
+
+            if(!scinameMatch && !semanticMatch && !levenshteinMatch && !vernacularNameMatch && !verbatimParseMatch && !verbatimGlossMatch && !stringMatch){
+                alert('Please select at least one criteria to search for linkages.');
+                return false;
+            }
+
+            if(levenshteinMatch && (!levenshteinValue || levenshteinValue == "")){
+                alert('Please enter a minimum Levenshtein Distance value.');
+                return false;
+            }
+
+            if(levenshteinMatch && isNaN(levenshteinValue)){
+                alert('The minimum Levenshtein Distance must be a number.');
+                return false;
+            }
+
+            if(verbatimParseMatch && (!verbatimParseValue || verbatimParseValue == "")){
+                alert('Please enter a verbatim parse value.');
+                return false;
+            }
+
+            if(verbatimGlossMatch && (!verbatimGlossValue || verbatimGlossValue == "")){
+                alert('Please enter a verbatim gloss value.');
+                return false;
+            }
+
+            if(stringMatch && (!stringMatchValue || stringMatchValue == "")){
+                alert('Please enter a search string value.');
+                return false;
+            }
+
+            return true;
+        }
     </script>
 </head>
 <body>
@@ -371,6 +439,11 @@ if($occId){
 if($eventId){
     echo '<div style="margin:10px;">';
     echo '<a href="dataeventeditor.php?eventid='.$eventId.'&collid='.$collId.'&tabtarget=1">Return to Data Collection Event Editor</a>';
+    echo '</div>';
+}
+if($action === 'Find records' && !$linkageSearchReturnArr){
+    echo '<div style="margin:10px;font-weight:bold;color:red;">';
+    echo 'There were no records matching your criteria.';
     echo '</div>';
 }
 ?>
@@ -630,65 +703,134 @@ if($eventId){
                 <img style="border:0px;width:12px;" src="../../images/add.png" />
             </div>
             <div id="addlinkagediv" style="clear:both;<?php echo ($linkageArr?'display:none;':''); ?>">
-                <form name="linkagenewform" action="dataeditor.php" method="post" onsubmit="return verifyNameLinkageForm(this);">
-                    <fieldset style="padding:15px">
-                        <legend><b>Add a New Name Linkage</b></legend>
-                        <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
-                            <span style="font-size:13px;"><b>Verbatim vernacular name to link:</b></span>
-                            <input id="ethnoLinkageName" name="linkageVerbatimName" type="text" style="width:500px;" value="" />
+                <fieldset style="padding:15px;">
+                    <legend><b>Set criteria for linkage search</b></legend>
+                    <form name="searchcriteriaform" method="post" action="dataeditor.php" onsubmit="return verifyLinkageSearchForm();">
+                        <div style="margin:5px;">
+                            <input name="scinameMatch" id="scinameMatch" value="1" type="checkbox" <?php echo ($scinameMatch?'checked':''); ?> /> With matching scientific name
                         </div>
-                        <div style="clear:both;margin-top:10px;">
-                            <span style="font-size:13px;"><b>Linkage type:</b></span>
-                            <div style="clear:both;margin-left:20px;">
-                                <input type="radio" name="linktype" value="cognate" > Cognate<br />
-                                <input type="radio" name="linktype" value="loan" > Loan<br />
-                                <input type="radio" name="linktype" value="calque" > Calque
-                            </div>
+                        <div style="margin:5px;">
+                            <input name="semanticMatch" id="semanticMatch" value="1" type="checkbox" <?php echo ($semanticMatch?'checked':''); ?> /> With matching semantic tags
                         </div>
-                        <div style="display:flex;clear:both;margin-top:10px;justify-content:space-between;">
-                            <span style="font-size:13px;"><b>Source reference:</b></span>
-                            <?php
-                            if($ethnoReferenceArr){
-                                ?>
-                                <select id="ethnoNewLinkageReference" name="refid" style="width:500px;">
-                                    <option value="">----Select reference----</option>
-                                    <?php
-                                    foreach($ethnoReferenceArr as $k => $v){
-                                        echo '<option value="'.$v['refid'].'">'.$v['title'].'</option>';
-                                    }
-                                    ?>
-                                </select>
-                                <?php
-                            }
-                            else{
-                                echo '<div>';
-                                echo 'There are no references associated with this project.<br />';
-                                echo 'Please go to the <a href="../../ethno/manager/index.php?collid='.$collId.'&tabindex=3" target="_blank">Reference Management tab</a> to add references.';
-                                echo '</div>';
-                            }
-                            ?>
+                        <div style="margin:3px;">
+                            <input name="levenshteinMatch" id="levenshteinMatch" value="1" type="checkbox" <?php echo ($levenshteinMatch?'checked':''); ?> /> With a levenshtein distance of
+                            <input name="levenshteinValue" id="levenshteinValue" type="text" value="<?php echo $levenshteinValue; ?>" /> or less
                         </div>
-                        <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
-                            <span style="font-size:13px;"><b>Reference pages:</b></span>
-                            <input name="refpages" type="text" style="width:500px;" value="" />
+                        <div style="margin:5px;">
+                            <input name="vernacularNameMatch" id="vernacularNameMatch" value="1" type="checkbox" <?php echo ($vernacularNameMatch?'checked':''); ?> /> With a matching vernacular name in a different language
                         </div>
-                        <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
-                            <span style="font-size:13px;"><b>Discussion:</b></span>
-                            <textarea name="discussion" style="width:500px;height:50px;resize:vertical;"></textarea>
+                        <div style="margin:3px;">
+                            <input name="verbatimParseMatch" id="verbatimParseMatch" value="1" type="checkbox" <?php echo ($verbatimParseMatch?'checked':''); ?> /> With a verbatim parse of
+                            <input name="verbatimParseValue" id="verbatimParseValue" type="text" value="<?php echo ($verbatimParseMatch?$verbatimParseValue:$dataArr["verbatimParse"]); ?>" />
                         </div>
-                        <div style="clear:both;float:right;margin-top:10px;">
-                            <input type="hidden" name="collid" value="<?php echo $collId; ?>" />
-                            <input type="hidden" name="occid" value="<?php echo $occId; ?>" />
-                            <input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
-                            <input type="hidden" name="csmode" value="<?php echo $csMode; ?>" />
+                        <div style="margin:3px;">
+                            <input name="verbatimGlossMatch" id="verbatimGlossMatch" value="1" type="checkbox" <?php echo ($verbatimGlossMatch?'checked':''); ?> /> With a verbatim gloss of
+                            <input name="verbatimGlossValue" id="verbatimGlossValue" type="text" value="<?php echo ($verbatimGlossMatch?$verbatimGlossValue:$dataArr["verbatimGloss"]); ?>" />
+                        </div>
+                        <div style="margin:3px;">
+                            <input name="stringMatch" id="stringMatch" value="1" type="checkbox" <?php echo ($stringMatch?'checked':''); ?> /> Containng this string
+                            <input name="stringMatchValue" id="stringMatchValue" type="text" value="<?php echo $stringMatchValue; ?>" />
+                        </div>
+                        <div style="margin:20px;">
+                            <input name="linkageVerbatimName" type="hidden" value="<?php echo $dataArr["verbatimVernacularName"]; ?>" />
+                            <input name="collid" type="hidden" value="<?php echo $collId; ?>" />
                             <input name="eventid" type="hidden" value="<?php echo $eventId; ?>" />
                             <input name="dataid" type="hidden" value="<?php echo $dataId; ?>" />
-                            <input type="hidden" id="ethnoLinkageNameId" name="linknameid" value="" />
-                            <input type="hidden" name="tabtarget" value="1" />
-                            <input type="submit" name="submitaction" value="Add Linkage" />
+                            <input name="occid" type="hidden" value="<?php echo $occId; ?>" />
+                            <input name="occindex" type="hidden" value="<?php echo $occIndex; ?>" />
+                            <input name="csmode" type="hidden" value="<?php echo $csMode; ?>" />
+                            <input name="tabtarget" type="hidden" value="1" />
+                            <input name="submitaction" type="submit" value="Find records" />
                         </div>
+                    </form>
+                </fieldset>
+
+                <?php
+                if($linkageSearchReturnArr){
+                    ?>
+                    <fieldset style="padding:15px">
+                        <legend><b>Add a New Linkages</b></legend>
+                        <form name="linkagenewform" action="dataeditor.php" method="post" onsubmit="return verifyNameLinkageForm(this);">
+                            <fieldset>
+                                <legend><b>Records matching criteria</b></legend>
+                                <table class="styledtable" style="width:770px;font-family:Arial;font-size:12px;margin-left:auto;margin-right:auto;">
+                                    <tr>
+                                        <th style="width:20px;"></th>
+                                        <th style="width:300px;">Project Name</th>
+                                        <th style="width:200px;">Verbatim Varnacular Name</th>
+                                        <th style="width:100px;">Language</th>
+                                        <th style="width:150px;">Verbatim Parse</th>
+                                        <th style="width:150px;">Verbatim Gloss</th>
+                                    </tr>
+                                    <?php
+                                    foreach($linkageSearchReturnArr as $dataId => $pArr){
+                                        echo '<tr>';
+                                        echo '<td style="width:20px;"><input name="linkdataid[]" type="checkbox" value="'.$dataId.'" /></td>'."\n";
+                                        echo '<td style="width:300px;">'.$pArr['CollectionName'].'</td>'."\n";
+                                        echo '<td style="width:200px;">'.$pArr['verbatimVernacularName'].'</td>'."\n";
+                                        echo '<td style="width:100px;">'.$pArr['languageName'].'</td>'."\n";
+                                        echo '<td style="width:150px;">'.$pArr['verbatimParse'].'</td>'."\n";
+                                        echo '<td style="width:150px;">'.$pArr['verbatimGloss'].'</td>'."\n";
+                                        echo '</tr>';
+                                    }
+                                    ?>
+                                </table>
+                            </fieldset>
+                            <div style="clear:both;margin-top:10px;">
+                                <span style="font-size:13px;"><b>Linkage type:</b></span>
+                                <div style="clear:both;margin-left:20px;">
+                                    <input type="radio" name="linktype" value="cognate" > Cognate<br />
+                                    <input type="radio" name="linktype" value="loan" > Loan<br />
+                                    <input type="radio" name="linktype" value="calque" > Calque
+                                </div>
+                            </div>
+                            <div style="display:flex;clear:both;margin-top:10px;justify-content:space-between;">
+                                <span style="font-size:13px;"><b>Source reference:</b></span>
+                                <?php
+                                if($ethnoReferenceArr){
+                                    ?>
+                                    <select id="ethnoNewLinkageReference" name="refid" style="width:500px;">
+                                        <option value="">----Select reference----</option>
+                                        <?php
+                                        foreach($ethnoReferenceArr as $k => $v){
+                                            echo '<option value="'.$v['refid'].'">'.$v['title'].'</option>';
+                                        }
+                                        ?>
+                                    </select>
+                                    <?php
+                                }
+                                else{
+                                    echo '<div>';
+                                    echo 'There are no references associated with this project.<br />';
+                                    echo 'Please go to the <a href="../../ethno/manager/index.php?collid='.$collId.'&tabindex=3" target="_blank">Reference Management tab</a> to add references.';
+                                    echo '</div>';
+                                }
+                                ?>
+                            </div>
+                            <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
+                                <span style="font-size:13px;"><b>Reference pages:</b></span>
+                                <input name="refpages" type="text" style="width:500px;" value="" />
+                            </div>
+                            <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
+                                <span style="font-size:13px;"><b>Discussion:</b></span>
+                                <textarea name="discussion" style="width:500px;height:50px;resize:vertical;"></textarea>
+                            </div>
+                            <div style="clear:both;float:right;margin-top:10px;">
+                                <input type="hidden" name="collid" value="<?php echo $collId; ?>" />
+                                <input type="hidden" name="occid" value="<?php echo $occId; ?>" />
+                                <input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
+                                <input type="hidden" name="csmode" value="<?php echo $csMode; ?>" />
+                                <input name="eventid" type="hidden" value="<?php echo $eventId; ?>" />
+                                <input name="dataid" type="hidden" value="<?php echo $dataId; ?>" />
+                                <input type="hidden" id="ethnoLinkageNameId" name="linknameid" value="" />
+                                <input type="hidden" name="tabtarget" value="1" />
+                                <input type="submit" name="submitaction" value="Add Linkage" />
+                            </div>
+                        </form>
                     </fieldset>
-                </form>
+                    <?php
+                }
+                ?>
             </div>
             <?php
             if($linkageArr){
@@ -698,57 +840,16 @@ if($eventId){
                     <?php
                     foreach($linkageArr as $linkId => $linkArr){
                         $linkageTypeStr = '';
-                        if($linkArr["linktype"]==='cognate') $linkageTypeStr = 'Cognate';
-                        elseif($linkArr["linktype"]==='loan') $linkageTypeStr = 'Loan';
-                        elseif($linkArr["linktype"]==='calque') $linkageTypeStr = 'Calque';
+                        if($linkArr["linktype"]==='cognate') {
+                            $linkageTypeStr = 'Cognate';
+                        }
+                        elseif($linkArr["linktype"]==='loan') {
+                            $linkageTypeStr = 'Loan';
+                        }
+                        elseif($linkArr["linktype"]==='calque') {
+                            $linkageTypeStr = 'Calque';
+                        }
                         ?>
-                        <script type="text/javascript">
-                            $(document).ready(function() {
-                                function split( val ) {
-                                    return val.split( /,\s*/ );
-                                }
-
-                                $( "#ethnoNameLinkageName<?php echo $linkId; ?>" )
-                                    .bind( "keydown", function( event ) {
-                                        if ( event.keyCode === $.ui.keyCode.TAB &&
-                                            $( this ).data( "ui-autocomplete" ).menu.active ) {
-                                            event.preventDefault();
-                                        }
-                                    })
-                                    .autocomplete({
-                                        source: function( request, response ) {
-                                            $.getJSON( "rpc/autofillvernacularname.php", {
-                                                name: request.term
-                                            }, response );
-                                        },
-                                        search: function() {
-                                            var term = this.value;
-                                            if ( term.length < 1 ) {
-                                                return false;
-                                            }
-                                        },
-                                        focus: function() {
-                                            return false;
-                                        },
-                                        select: function( event, ui ) {
-                                            var terms = this.value.split( /,\s*/ );
-                                            terms.pop();
-                                            terms.push( ui.item.value );
-                                            document.getElementById('ethnoLinkageNameId<?php echo $linkId; ?>').value = ui.item.id;
-                                            this.value = terms;
-                                            return false;
-                                        },
-                                        change: function (event, ui) {
-                                            if (!ui.item) {
-                                                this.value = '';
-                                                document.getElementById('ethnoLinkageNameId<?php echo $linkId; ?>').value = '';
-                                                alert("Vernacular name must be selected from the list.");
-                                            }
-                                        }
-                                    },
-                                {});
-                            });
-                        </script>
                         <div style="float:right;cursor:pointer;" onclick="toggle('linkage<?php echo $linkId; ?>editdiv');" title="Edit Linkage Record">
                             <img style="border:0px;width:15px;" src="../../images/edit.png" />
                         </div>
