@@ -32,8 +32,12 @@ class EthnoUpload{
 	
 	public function setUploadFile(){
 		if(array_key_exists('uploadfile',$_FILES)){
-			$this->uploadFileName = $_FILES['uploadfile']['name'];
-			move_uploaded_file($_FILES['uploadfile']['tmp_name'], $this->uploadTargetPath.$this->uploadFileName);
+			$inFileName = basename($_FILES['uploadfile']['name']);
+            $ext = substr(strrchr($inFileName, '.'), 1);
+            $fileName = 'ethnoDataFile_'.time();
+            $this->uploadFileName = $fileName.'.'.$ext;
+            $this->uploadTargetPath = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1) != '/'?'/':'').'temp/data/';
+            move_uploaded_file($_FILES['uploadfile']['tmp_name'], $this->uploadTargetPath.$this->uploadFileName);
 		}
 		if(file_exists($this->uploadTargetPath.$this->uploadFileName) && substr($this->uploadFileName,-4) === '.zip'){
 			$zip = new ZipArchive;
