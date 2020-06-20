@@ -15,7 +15,8 @@ class EthnoUpload{
 	
 	public function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon('write');
- 		$this->setUploadTargetPath();
+ 		// $this->setUploadTargetPath();
+        $this->uploadTargetPath = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1) != '/'?'/':'').'temp/data/';
  		set_time_limit(3000);
 		ini_set('max_input_time',120);
   		ini_set('auto_detect_line_endings', true);
@@ -36,7 +37,6 @@ class EthnoUpload{
             $ext = substr(strrchr($inFileName, '.'), 1);
             $fileName = 'ethnoDataFile_'.time();
             $this->uploadFileName = $fileName.'.'.$ext;
-            $this->uploadTargetPath = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1) != '/'?'/':'').'temp/data/';
             move_uploaded_file($_FILES['uploadfile']['tmp_name'], $this->uploadTargetPath.$this->uploadFileName);
 		}
 		if(file_exists($this->uploadTargetPath.$this->uploadFileName) && substr($this->uploadFileName,-4) === '.zip'){
