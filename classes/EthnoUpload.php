@@ -168,7 +168,7 @@ class EthnoUpload{
             foreach($fieldMap as $csvField => $field){
                 if($field === 'consultantname'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $consultantName = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $consultantName = $this->cleanInStr($recordArr[$index]);
                     $consultantId = array_key_exists($consultantName,$consultantArr)?$consultantArr[$consultantName]:0;
                     if(!$consultantId){
                         $this->outputMsg('ERROR: Consultant '.$consultantName.' is not associated with this project.');
