@@ -914,20 +914,21 @@ class EthnoDataManager {
 
     public function getLinkageArr($dataId){
         $returnArr = array();
-        $sql = 'SELECT l.ethlinkid, l.ethnidlink, l.linktype, l.refpages, l.discussion, r.title, g.id, l.refid, '.
+        $sql = 'SELECT l.ethlinkid, l.ethdidlink, l.linktype, l.refpages, l.discussion, r.title, g.id, l.refid, '.
             'g.iso639P3code, g.`name`, IFNULL(t.SciName,o.sciname) AS sciname, n.verbatimVernacularName '.
             'FROM ethnolinkages AS l LEFT JOIN ethnodata AS n ON l.ethdidlink = n.ethdid '.
             'LEFT JOIN glottolog AS g ON n.langId = g.id '.
             'LEFT JOIN taxa AS t ON n.tid = t.TID '.
             'LEFT JOIN omoccurrences AS o ON n.occid = o.occid '.
             'LEFT JOIN referenceobject AS r ON l.refid = r.refid '.
-            'WHERE l.ethdid = '.$dataId.' ';
+            'WHERE l.ethdid = '.$dataId.' OR l.ethdidlink = '.$dataId.' ';
+        //echo $sql;
         if($rs = $this->conn->query($sql)){
             while($row = $rs->fetch_object()){
                 $recId = $row->ethlinkid;
                 $langName = $row->id.' | '.($row->iso639P3code?$row->iso639P3code:'[No ISO code]').' | '.$row->name;
                 $returnArr[$recId]['verbatimVernacularName'] = $row->verbatimVernacularName;
-                $returnArr[$recId]['linkedNameId'] = $row->ethnidlink;
+                $returnArr[$recId]['linkedNameId'] = $row->ethdidlink;
                 $returnArr[$recId]['refid'] = $row->refid;
                 $returnArr[$recId]['langName'] = $langName;
                 $returnArr[$recId]['sciname'] = $row->sciname;
@@ -1075,18 +1076,19 @@ class EthnoDataManager {
     }
 
     public function createDataLinkage($pArr){
-        $valueStr = 'VALUES (';
-        $valueStr .= $pArr['nameid'].',';
-        $valueStr .= $pArr['linknameid'].',';
-        $valueStr .= ($this->cleanInStr($pArr['linktype'])?'"'.$this->cleanInStr($pArr['linktype']).'",':'null,');
-        $valueStr .= (array_key_exists("refid",$pArr)&&$pArr['refid']?$pArr['refid'].',':'null,');
-        $valueStr .= ($this->cleanInStr($pArr['refpages'])?'"'.$this->cleanInStr($pArr['refpages']).'",':'null,');
-        $valueStr .= ($this->cleanInStr($pArr['discussion'])?'"'.$this->cleanInStr($pArr['discussion']).'") ':'null) ');
-        $sql = 'INSERT INTO ethnolinkages(ethdid,ethdidlink,linktype,refid,refpages,discussion) '.$valueStr;
-        if($this->conn->query($sql)){
-            return true;
+        if(array_key_exists('linkdataid',$pArr)){
+            foreach($pArr['linkdataid'] as $id){
+                $valueStr = 'VALUES (';
+                $valueStr .= $pArr['dataid'].',';
+                $valueStr .= (int)$id.',';
+                $valueStr .= ($this->cleanInStr($pArr['linktype'])?'"'.$this->cleanInStr($pArr['linktype']).'",':'null,');
+                $valueStr .= (array_key_exists("refid",$pArr)&&$pArr['refid']?$pArr['refid'].',':'null,');
+                $valueStr .= ($this->cleanInStr($pArr['refpages'])?'"'.$this->cleanInStr($pArr['refpages']).'",':'null,');
+                $valueStr .= ($this->cleanInStr($pArr['discussion'])?'"'.$this->cleanInStr($pArr['discussion']).'") ':'null) ');
+                $sql = 'INSERT INTO ethnolinkages(ethdid,ethdidlink,linktype,refid,refpages,discussion) '.$valueStr;
+                $this->conn->query($sql);
+            }
         }
-        return false;
     }
 
     public function saveDataLinkageChanges($pArr){
@@ -1170,6 +1172,7 @@ class EthnoDataManager {
         $returnArr = array();
         $sql = 'SELECT DISTINCT ed.ethdid, c.CollectionName, ed.verbatimVernacularName, g.`name` AS languageName, ed.verbatimGloss, ed.verbatimParse '.
             'FROM ethnodata AS ed LEFT JOIN ethnodataevent AS edev ON ed.etheventid = edev.etheventid '.
+            'LEFT JOIN omoccurrences AS o ON ed.occid = o.occid '.
             'LEFT JOIN omcollections AS c ON edev.collid = c.CollID '.
             'LEFT JOIN glottolog AS g ON ed.langId = g.id ';
         if(array_key_exists("semanticMatch",$pArr)){

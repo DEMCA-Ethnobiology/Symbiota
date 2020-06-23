@@ -73,35 +73,35 @@ class EthnoUpload{
             foreach($fieldMap as $csvField => $field){
                 if($field === 'communityname'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $communityname = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $communityname = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'recordnumber'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $recordNumber = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $recordNumber = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'datasource'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $datasource = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $datasource = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'eventdate'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $eventdate = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $eventdate = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'eventlocation'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $eventlocation = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $eventlocation = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'namedatadiscussion'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $namedatadiscussion = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $namedatadiscussion = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'usedatadiscussion'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $usedatadiscussion = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $usedatadiscussion = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'consultantdiscussion'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $consultantdiscussion = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $consultantdiscussion = $this->cleanInStr($recordArr[$index]);
                 }
             }
             if($communityname || $recordNumber || $datasource || $eventdate || $eventlocation || $namedatadiscussion || $usedatadiscussion || $consultantdiscussion){
@@ -176,75 +176,75 @@ class EthnoUpload{
                 }
                 if($field === 'recordnumber'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $recordNumber = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $recordNumber = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'refpages'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $refpages = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $refpages = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'verbatimvernacularname'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $verbatimVernacularName = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $verbatimVernacularName = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'annotatedvernacularname'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $annotatedVernacularName = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $annotatedVernacularName = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'verbatimlanguage'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $verbatimLanguage = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $verbatimLanguage = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'languageglottologid'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $languageGlottologId = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $languageGlottologId = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'otherverbatimvernacularname'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $otherVerbatimVernacularName = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $otherVerbatimVernacularName = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'otherlanguageglottologid'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $otherLanguageGlottologId = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $otherLanguageGlottologId = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'verbatimparse'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $verbatimParse = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $verbatimParse = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'annotatedparse'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $annotatedParse = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $annotatedParse = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'verbatimgloss'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $verbatimGloss = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $verbatimGloss = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'annotatedgloss'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $annotatedGloss = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $annotatedGloss = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'typology'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $typology = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $typology = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'translation'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $translation = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $translation = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'taxonomicdescription'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $taxonomicDescription = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $taxonomicDescription = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'namediscussion'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $nameDiscussion = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $nameDiscussion = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'consultantcomments'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $consultantComments = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $consultantComments = $this->cleanInStr($recordArr[$index]);
                 }
                 if($field === 'usediscussion'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
-                    $useDiscussion = $this->cleanInStr(htmlentities($recordArr[$index]));
+                    $useDiscussion = $this->cleanInStr($recordArr[$index]);
                 }
             }
             if($consultantName || $recordNumber || $refpages || $verbatimVernacularName || $annotatedVernacularName || $verbatimLanguage || $languageGlottologId || $otherVerbatimVernacularName || $otherLanguageGlottologId || $verbatimParse || $annotatedParse || $verbatimGloss || $annotatedGloss || $typology || $translation || $taxonomicDescription || $nameDiscussion || $consultantComments || $useDiscussion){
@@ -474,21 +474,19 @@ class EthnoUpload{
                 if(!$uetheventid){
                     $sql = 'SELECT etheventid FROM ethnodataevent WHERE occid = '.$uoccid.' ';
                     if($rs2 = $this->conn->query($sql)){
-                        while($row = $rs2->fetch_object()){
-                            if($row->etheventid){
-                                $uetheventid = $row->etheventid;
+                        if($row = $rs2->fetch_object()){
+                            $uetheventid = $row->etheventid;
+                        }
+                        else{
+                            $sql2 = 'INSERT INTO ethnodataevent(collid,occid,eventdate,eventlocation,datasource) '.
+                                'SELECT '.$this->collId.', '.$uoccid.', eventDate, CONCAT_WS("; ",country,stateProvince,locality), "elicitation" '.
+                                'FROM omoccurrences '.
+                                'WHERE occid = '.$uoccid.' ';
+                            if($this->conn->query($sql2)){
+                                $uetheventid = $this->conn->insert_id;
                             }
                             else{
-                                $sql2 = 'INSERT INTO ethnodataevent(collid,occid,eventdate,eventlocation) '.
-                                    'SELECT '.$this->collId.', '.$uoccid.', eventDate, locality '.
-                                    'FROM omoccurrences '.
-                                    'WHERE occid = '.$uoccid.' ';
-                                if($this->conn->query($sql2)){
-                                    $uetheventid = $this->conn->insert_id;
-                                }
-                                else{
-                                    $this->outputMsg('ERROR loading data: '.$this->conn->error);
-                                }
+                                $this->outputMsg('ERROR loading data: '.$this->conn->error);
                             }
                         }
                     }

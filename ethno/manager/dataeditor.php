@@ -49,7 +49,7 @@ if($action === 'Edit Data Record'){
     $ethnoDataManager->saveDataRecordChanges($_POST);
 }
 elseif($action === 'Add Linkage'){
-    //$ethnoDataManager->createDataLinkage($_POST);
+    $ethnoDataManager->createDataLinkage($_POST);
 }
 elseif($action === 'Edit Linkage'){
     $ethnoDataManager->saveDataLinkageChanges($_POST);
@@ -225,11 +225,19 @@ $usePartsArr = $dataArr["partsTags"];
         }
 
         function verifyNameLinkageForm(f){
+            var linkVerified = false;
             var linkTypeVerified = false;
             for(var h=0;h<f.length;h++){
+                if(f.elements[h].name === "linkdataid[]" && f.elements[h].checked){
+                    linkVerified = true;
+                }
                 if(f.elements[h].name === "linktype" && f.elements[h].checked){
                     linkTypeVerified = true;
                 }
+            }
+            if(!linkVerified){
+                alert("Please select a record to link.");
+                return false;
             }
             if(!linkTypeVerified){
                 alert("Please select a link type.");
@@ -702,7 +710,7 @@ if($action === 'Find records' && !$linkageSearchReturnArr){
             <div style="float:right;margin-bottom:10px;cursor:pointer;<?php echo (!$linkageArr?'display:none;':''); ?>" onclick="toggle('addlinkagediv');" title="Add a New Linkage">
                 <img style="border:0px;width:12px;" src="../../images/add.png" />
             </div>
-            <div id="addlinkagediv" style="clear:both;<?php echo ($linkageArr?'display:none;':''); ?>">
+            <div id="addlinkagediv" style="clear:both;<?php echo (($linkageArr && $action !== 'Find records')?'display:none;':''); ?>">
                 <fieldset style="padding:15px;">
                     <legend><b>Set criteria for linkage search</b></legend>
                     <form name="searchcriteriaform" method="post" action="dataeditor.php" onsubmit="return verifyLinkageSearchForm();">
@@ -728,7 +736,7 @@ if($action === 'Find records' && !$linkageSearchReturnArr){
                             <input name="verbatimGlossValue" id="verbatimGlossValue" type="text" value="<?php echo ($verbatimGlossMatch?$verbatimGlossValue:$dataArr["verbatimGloss"]); ?>" />
                         </div>
                         <div style="margin:3px;">
-                            <input name="stringMatch" id="stringMatch" value="1" type="checkbox" <?php echo ($stringMatch?'checked':''); ?> /> Containng this string
+                            <input name="stringMatch" id="stringMatch" value="1" type="checkbox" <?php echo ($stringMatch?'checked':''); ?> /> Containing this string
                             <input name="stringMatchValue" id="stringMatchValue" type="text" value="<?php echo $stringMatchValue; ?>" />
                         </div>
                         <div style="margin:20px;">
@@ -763,9 +771,9 @@ if($action === 'Find records' && !$linkageSearchReturnArr){
                                         <th style="width:150px;">Verbatim Gloss</th>
                                     </tr>
                                     <?php
-                                    foreach($linkageSearchReturnArr as $dataId => $pArr){
+                                    foreach($linkageSearchReturnArr as $linkDataId => $pArr){
                                         echo '<tr>';
-                                        echo '<td style="width:20px;"><input name="linkdataid[]" type="checkbox" value="'.$dataId.'" /></td>'."\n";
+                                        echo '<td style="width:20px;"><input name="linkdataid[]" type="checkbox" value="'.$linkDataId.'" /></td>'."\n";
                                         echo '<td style="width:300px;">'.$pArr['CollectionName'].'</td>'."\n";
                                         echo '<td style="width:200px;">'.$pArr['verbatimVernacularName'].'</td>'."\n";
                                         echo '<td style="width:100px;">'.$pArr['languageName'].'</td>'."\n";
