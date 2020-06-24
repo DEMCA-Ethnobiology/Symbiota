@@ -19,7 +19,7 @@ $vernacularUseText = 'There are currently no vernacular uses for this taxon.';
 $multimediaText = 'There are currently no multimedia records associated with this taxon.';
 $nameSummaryText = 'There are currently no name summary for this taxon.';
 $nameAnalysisText = 'There are currently no name analysis for this taxon.';
-$publicCommentsText = 'There are currently no public comments for this taxon.';
+$calqueLoansText = 'At this time no calques or loans have been suggested for any Indigenous names related to this taxon.';
 if($SYMB_UID){
     if($IS_ADMIN){
         $isCollAdmin = true;
@@ -85,6 +85,16 @@ foreach($descArr as $dArr){
             }
             unset($dArr[$id]);
         }
+        if($vArr["caption"] === 'Calques/loans'){
+            $calqueLoansText = '';
+            $stArr = $vArr["desc"];
+            foreach($stArr as $tdsId => $stmt){
+                $calqueLoansText .= "<div style='margin-bottom:15px;'>";
+                $calqueLoansText .= $stmt." ";
+                $calqueLoansText .= "</div>";
+            }
+            unset($dArr[$id]);
+        }
     }
 }
 
@@ -98,13 +108,13 @@ foreach($descArr as $dArr){
         echo '<li><a href="#ethnomediatab">Multimedia</a></li>';
         echo '<li><a href="#ethnonamesummarytab">Plant names summary</a></li>';
         echo '<li><a href="#ethnonameanalysistab">Plant names analysis</a></li>';
-        echo '<li><a href="#publiccomments">Public comments</a></li>';
+        echo '<li><a href="#ethnocalquesloans">Calques/loans</a></li>';
         if($descArr){
             $capCnt = 1;
             foreach($descArr as $dArr){
                 foreach($dArr as $id => $vArr){
                     $cap = $vArr["caption"];
-                    if($cap !== 'Description' && $cap !== 'Vernacular names' && $cap !== 'Vernacular uses' && $cap !== 'Multimedia' && $cap !== 'Plant names summary' && $cap !== 'Plant names analysis'){
+                    if($cap !== 'Description' && $cap !== 'Vernacular names' && $cap !== 'Vernacular uses' && $cap !== 'Multimedia' && $cap !== 'Plant names summary' && $cap !== 'Plant names analysis' && $cap !== 'Calques/loans'){
                         if(!$cap){
                             $cap = 'Description #'.$capCnt;
                             $capCnt++;
@@ -174,15 +184,15 @@ foreach($descArr as $dArr){
     <div id="ethnonameanalysistab" style="height:330px;width:94%;overflow:auto;">
         <?php echo $nameAnalysisText; ?>
     </div>
-    <div id="publiccomments" style="height:330px;width:94%;overflow:auto;">
-        <?php echo $publicCommentsText; ?>
+    <div id="ethnocalquesloans" style="height:330px;width:94%;overflow:auto;">
+        <?php echo $calqueLoansText; ?>
     </div>
     <?php
     if($descArr){
         foreach($descArr as $dArr){
             foreach($dArr as $id => $vArr){
                 $cap = $vArr["caption"];
-                if($cap !== 'Description' && $cap !== 'Vernacular names' && $cap !== 'Vernacular uses' && $cap !== 'Multimedia' && $cap !== 'Plant names summary' && $cap !== 'Plant names analysis'){
+                if($cap !== 'Description' && $cap !== 'Vernacular names' && $cap !== 'Vernacular uses' && $cap !== 'Multimedia' && $cap !== 'Plant names summary' && $cap !== 'Plant names analysis' && $cap !== 'Calques/loans'){
                     ?>
                     <div id="tab<?php echo $id; ?>" style="height:330px;width:94%;overflow:auto;">
                         <?php
@@ -547,4 +557,79 @@ foreach($descArr as $dArr){
 </div>
 <?php
 $ethnoTabsDiv = ob_get_clean();
+
+ob_start();
+?>
+<div id="imagebox">
+    <?php
+    if($clValue){
+        echo "<legend>";
+        echo $LANG['SPECIES_WITHIN'].' <b>'.$taxonManager->getClName().'</b>&nbsp;&nbsp;';
+        if($taxonManager->getParentClid()){
+            echo '<a href="index.php?taxon='.$taxonValue.'&cl='.$taxonManager->getParentClid().'&taxauthid='.$taxAuthId.'" title="'.$LANG['GO_TO'].' '.$taxonManager->getParentName().' '.$LANG['CHECKLIST'].'"><img id="parenttaxonicon" src="../images/toparent.png" title="Go to Parent" /></a>';
+        }
+        echo "</legend>";
+    }
+    ?>
+    <div>
+        <?php
+        $sppArr = $taxonManager->getSppArray();
+        $sppArr = $ethnoDataManager->filterTaxaSppArray($sppArr);
+        if($sppArr){
+            $cnt = 0;
+            ksort($sppArr);
+            foreach($sppArr as $sciNameKey => $subArr){
+                echo "<div class='spptaxon'>";
+                echo "<div class='spptaxonbox'>";
+                echo "<a href='index.php?taxon=".$subArr["tid"]."&taxauthid=".$taxAuthId.($clValue?"&cl=".$clValue:"")."'>";
+                echo "<i>".$sciNameKey."</i>";
+                echo "</a></div>\n";
+                echo "<div class='sppimg'>";
+
+                if(array_key_exists("url",$subArr)){
+                    $imgUrl = $subArr["url"];
+                    if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
+                        $imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+                    }
+                    echo "<a href='index.php?taxon=".$subArr["tid"]."&taxauthid=".$taxAuthId.($clValue?"&cl=".$clValue:"")."'>";
+
+                    if($subArr["thumbnailurl"]){
+                        $imgUrl = $subArr["thumbnailurl"];
+                        if(array_key_exists("imageDomain",$GLOBALS) && substr($subArr["thumbnailurl"],0,1)=="/"){
+                            $imgUrl = $GLOBALS["imageDomain"].$subArr["thumbnailurl"];
+                        }
+                    }
+                    echo '<img class="taxonimage" src="'.$imgUrl.'" title="'.$subArr['caption'].'" alt="Image of '.$sciNameKey.'" />';
+                    echo '</a>';
+                    echo '<div id="imgphotographer" title="'.$LANG['PHOTOGRAPHER'].': '.$subArr['photographer'].'">';
+                    echo '</div>';
+                }
+                elseif($isEditor){
+                    echo '<div class="spptext"><a href="admin/tpeditor.php?category=imageadd&tid='.$subArr['tid'].'">'.$LANG['ADD_IMAGE'].'!</a></div>';
+                }
+                else{
+                    echo '<div class="spptext">'.$LANG['IMAGE_NOT_AVAILABLE'].'</div>';
+                }
+                echo "</div>\n";
+
+                //Display thumbnail map
+                echo '<div class="sppmap">';
+                if(array_key_exists("map",$subArr) && $subArr["map"]){
+                    echo '<img src="'.$subArr['map'].'" title="'.$spDisplay.'" alt="'.$spDisplay.'" />';
+                }
+                elseif($taxonManager->getRankId()>140){
+                    echo '<div class="spptext">'.$LANG['MAP_NOT_AVAILABLE'].'</div>';
+                }
+                echo '</div>';
+
+                echo "</div>";
+                $cnt++;
+            }
+        }
+        ?>
+        <div class="clear"><hr></div>
+    </div>
+</div>
+<?php
+$ethnoImgBoxDiv = ob_get_clean();
 ?>

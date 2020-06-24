@@ -65,7 +65,7 @@ if($action == "logout"){
 }
 elseif($action == "Login"){
 	if($pHandler->authenticate($_POST["password"])){
-		if(!$refUrl || (strtolower(substr($refUrl,0,4)) == 'http') || strpos($refUrl,'newprofile.php')){
+		if(!$refUrl || (strtolower(substr($refUrl,0,4)) == 'http')){
 			header("Location: ../index.php");
 		}
 		else{
@@ -172,12 +172,6 @@ if(isset($profile_indexCrumbs)){
 			</form>
 		</fieldset>
 		<div style="width:300px;text-align:center;margin:20px;">
-			<div style="font-weight:bold;">
-				Don't have an Account?
-			</div>
-			<div style="">
-				<a href="newprofile.php?refurl=<?php echo $refUrl; ?>">Create an account now</a>
-			</div>
 			<div style="font-weight:bold;margin-top:5px">
 				Can't remember your password?
 			</div>

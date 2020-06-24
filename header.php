@@ -29,11 +29,6 @@
 								Log in
 							</a>
 						</span>
-                        <span style="margin-left:5px;">
-							<a href="<?php echo $clientRoot; ?>/profile/newprofile.php">
-								New account
-							</a>
-						</span>
                         <?php
                     }
                     ?>

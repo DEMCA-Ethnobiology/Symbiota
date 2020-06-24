@@ -132,8 +132,14 @@ class EthnoMediaManager {
             //$parentTierID = $a_tier['PARENT_REF']?(string)$a_tier['PARENT_REF']:(string)$a_tier['TIER_ID'];
             $tier_id = trim(stripslashes((string)$a_tier['TIER_ID']));
             if($tier_id){
+                $include = false;
+                foreach ($a_tier->ANNOTATION as $a_nnotation){
+                    if($a_nnotation){
+                        $include = true;
+                    }
+                }
                 $participant = trim(stripslashes((string)$a_tier['PARTICIPANT']));
-                if($participant || $tier_id) {
+                if(($participant || $tier_id) && $include) {
                     $parent_ref = trim(stripslashes((string)$a_tier['PARENT_REF']));
                     if(!$participant && $parent_ref) {
                         $participant = $parent_ref;

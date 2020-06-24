@@ -22,14 +22,14 @@ if($taxonRank){
         $topRowElements = Array();
         $leftColumnElements = Array($scinameHeaderDiv,$familyDiv,$taxonNotesDiv,$taxonSourcesDiv,$projectDiv,$centralImageDiv);
         $rightColumnElements = Array($editButtonDiv,$ethnoTabsDiv);
-        $bottomRowElements = Array($imgBoxDiv);
+        $bottomRowElements = Array($ethnoImgBoxDiv);
         $footerRowElements = Array($footerLinksDiv);
     }
     else{
         $topRowElements = Array();
         $leftColumnElements = Array($scinameHeaderDiv,$familyDiv,$taxonNotesDiv,$taxonSourcesDiv,$projectDiv,$centralImageDiv);
         $rightColumnElements = Array($editButtonDiv,$ethnoTabsDiv);
-        $bottomRowElements = Array($imgBoxDiv);
+        $bottomRowElements = Array($ethnoImgBoxDiv);
         $footerRowElements = Array($footerLinksDiv);
     }
 }

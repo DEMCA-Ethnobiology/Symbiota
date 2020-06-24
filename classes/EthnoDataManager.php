@@ -1349,5 +1349,21 @@ class EthnoDataManager {
         $newStr = $this->conn->real_escape_string($newStr);
         return $newStr;
     }
+
+    public function filterTaxaSppArray($sppArr){
+        foreach($sppArr as $sciNameKey => $subArr){
+            $tId = $subArr["tid"];
+            $sql = 'SELECT occid FROM omoccurrences WHERE tidinterpreted = '.$tId.' LIMIT 1 ';
+            $rs = $this->conn->query($sql);
+            if($rs->num_rows < 1){
+                $sql2 = 'SELECT tdbid FROM taxadescrblock WHERE tid = '.$tId.' LIMIT 1 ';
+                $rs2 = $this->conn->query($sql2);
+                if($rs2->num_rows < 1){
+                    unset($sppArr[$sciNameKey]);
+                }
+            }
+        }
+        return $sppArr;
+    }
 }
 ?>
