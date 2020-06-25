@@ -196,7 +196,7 @@ $referenceArr = $ethnoManager->getReferenceArr();
                 <button type="submit"><b>Create Reference</b></button>
             </div>
         </fieldset>
-        <input name="action" type="hidden" value="Add Reference" />
+        <input name="action" type="hidden" value="Create Reference" />
         <input name="ispublished" type="hidden" value="1" />
         <input type="hidden" name="tabindex" value="2" />
         <input name="collid" type="hidden" value="<?php echo $collid; ?>" />

@@ -651,7 +651,9 @@ class EthnoDataManager {
         $valueStr .= 'verbatimVernacularName='.($this->cleanInStr($pArr['verbatimVernacularName'])?'"'.$this->cleanInStr($pArr['verbatimVernacularName']).'"':'null').',';
         $valueStr .= 'langId='.($this->cleanInStr($pArr['languageid'])?'"'.$this->cleanInStr($pArr['languageid']).'"':'null').',';
         $valueStr .= 'otherVerbatimVernacularName='.($this->cleanInStr($pArr['otherVerbatimVernacularName'])?'"'.$this->cleanInStr($pArr['otherVerbatimVernacularName']).'"':'null').',';
-        $valueStr .= 'otherLangId='.($this->cleanInStr($pArr['otherlanguageid'])?'"'.$this->cleanInStr($pArr['otherlanguageid']).'"':'null').',';
+        if(array_key_exists('otherlanguageid',$pArr)){
+            $valueStr .= 'otherLangId='.($this->cleanInStr($pArr['otherlanguageid'])?'"'.$this->cleanInStr($pArr['otherlanguageid']).'"':'null').',';
+        }
         $valueStr .= 'verbatimParse='.($this->cleanInStr($pArr['verbatimParse'])?'"'.$this->cleanInStr($pArr['verbatimParse']).'"':'null').',';
         $valueStr .= 'verbatimGloss='.($this->cleanInStr($pArr['verbatimGloss'])?'"'.$this->cleanInStr($pArr['verbatimGloss']).'"':'null').',';
         $valueStr .= 'translation='.($this->cleanInStr($pArr['freetranslation'])?'"'.$this->cleanInStr($pArr['freetranslation']).'"':'null').',';
@@ -881,21 +883,25 @@ class EthnoDataManager {
         return $returnArr;
     }
 
-    public function getOccTextStr(){
-        $textStr = '';
+    public function getOccTextStr($showOcc = true){
+        $occText = '';
         $sql = 'SELECT o.occid, CONCAT_WS(" ",o.catalogNumber,o.recordedBy,o.recordNumber) AS occStr '.
             'FROM omoccurrences AS o '.
             'WHERE o.occid = '.$this->occid.' ';
         //echo $sql; exit;
         if($rs = $this->conn->query($sql)){
             while($r = $rs->fetch_object()){
-                $occText = $r->occid.': '.$r->occStr;
-                $textStr = $occText;
+                if($showOcc){
+                    $occText = $r->occid.': '.$r->occStr;
+                }
+                else{
+                    $occText = $r->occStr;
+                }
             }
             $rs->free();
         }
 
-        return $textStr;
+        return $occText;
     }
 
     public function getUseEditKingdomId($tId){
@@ -1132,8 +1138,16 @@ class EthnoDataManager {
         $this->linkageSqlWhere = '';
         $dataId = $pArr['dataid'];
 
-        if(array_key_exists("scinameMatch",$pArr)){
-            $tidStr = $this->getDataRecordTidStr($dataId);
+        if(array_key_exists("genusMatch",$pArr) || array_key_exists("scinameMatch",$pArr)){
+            $tid = $this->getDataRecordTid($dataId);
+            if(array_key_exists("genusMatch",$pArr)){
+                $genusTid = $this->getGenusTid($tid);
+                $childTidArr = $this->getChildTidArr($genusTid);
+                $tidStr = implode(",", $childTidArr);
+            }
+            else{
+                $tidStr = $tid;
+            }
             if($tidStr){
                 $this->linkageSqlWhere .= 'AND ((ISNULL(ed.occid) AND ed.tid IN('.$tidStr.')) OR (ed.occid IS NOT NULL AND o.tidinterpreted IN('.$tidStr.'))) ';
             }
@@ -1152,17 +1166,38 @@ class EthnoDataManager {
                 $this->linkageSqlWhere .= 'AND (ed.ethdid IN('.$idStr.')) ';
             }
         }
-        if(array_key_exists("vernacularNameMatch",$pArr)){
-            $this->linkageSqlWhere .= 'AND (ed.verbatimVernacularName = "'.$pArr["linkageVerbatimName"].'") ';
+        if(array_key_exists("vernacularDiffLang",$pArr)){
+            $this->linkageSqlWhere .= 'AND (ed.langId <> "'.$pArr["linkageLangId"].'") ';
+        }
+        if(array_key_exists("vernacularStringMatch",$pArr)){
+            $this->linkageSqlWhere .= 'AND (ed.verbatimVernacularName LIKE "%'.$pArr["vernacularStringMatchValue"].'%") ';
+        }
+        if(array_key_exists("vernacularRegexMatch",$pArr)){
+            $idArr = $this->getVernacularRegexMatchArr($pArr["vernacularRegexMatchValue"]);
+            $idStr = implode(",", $idArr);
+            if($idStr){
+                $this->linkageSqlWhere .= 'AND (ed.ethdid IN('.$idStr.')) ';
+            }
         }
         if(array_key_exists("verbatimParseMatch",$pArr)){
             $this->linkageSqlWhere .= 'AND (ed.verbatimParse = "'.$pArr["verbatimParseValue"].'") ';
         }
+        if(array_key_exists("verbatimParseRegexMatch",$pArr)){
+            $idArr = $this->getParseRegexMatchArr($pArr["verbatimParseRegexMatchValue"]);
+            $idStr = implode(",", $idArr);
+            if($idStr){
+                $this->linkageSqlWhere .= 'AND (ed.ethdid IN('.$idStr.')) ';
+            }
+        }
         if(array_key_exists("verbatimGlossMatch",$pArr)){
             $this->linkageSqlWhere .= 'AND (ed.verbatimGloss = "'.$pArr["verbatimGlossValue"].'") ';
         }
-        if(array_key_exists("stringMatch",$pArr)){
-            $this->linkageSqlWhere .= 'AND (ed.verbatimVernacularName LIKE "%'.$pArr["stringMatchValue"].'%") ';
+        if(array_key_exists("verbatimGlossRegexMatch",$pArr)){
+            $idArr = $this->getGlossRegexMatchArr($pArr["verbatimGlossRegexMatchValue"]);
+            $idStr = implode(",", $idArr);
+            if($idStr){
+                $this->linkageSqlWhere .= 'AND (ed.ethdid IN('.$idStr.')) ';
+            }
         }
 
         $this->linkageSqlWhere = substr($this->linkageSqlWhere, 4);
@@ -1193,11 +1228,49 @@ class EthnoDataManager {
         return $returnArr;
     }
 
+    public function getGlossRegexMatchArr($regexStr){
+        $returnArr = array();
+        $sql = 'SELECT ethdid, verbatimGloss FROM ethnodata ';
+        $rs = $this->conn->query($sql);
+        while ($r = $rs->fetch_object()){
+            $pregMatchStr = "/" . $regexStr . "/";
+            if(preg_match($pregMatchStr, $r->verbatimGloss)){
+                $returnArr[] = $r->ethdid;
+            }
+        }
+        return $returnArr;
+    }
+
+    public function getParseRegexMatchArr($regexStr){
+        $returnArr = array();
+        $sql = 'SELECT ethdid, verbatimParse FROM ethnodata ';
+        $rs = $this->conn->query($sql);
+        while ($r = $rs->fetch_object()){
+            $pregMatchStr = "/" . $regexStr . "/";
+            if(preg_match($pregMatchStr, $r->verbatimParse)){
+                $returnArr[] = $r->ethdid;
+            }
+        }
+        return $returnArr;
+    }
+
+    public function getVernacularRegexMatchArr($regexStr){
+        $returnArr = array();
+        $sql = 'SELECT ethdid, verbatimVernacularName FROM ethnodata ';
+        $rs = $this->conn->query($sql);
+        while ($r = $rs->fetch_object()){
+            $pregMatchStr = "/" . $regexStr . "/";
+            if(preg_match($pregMatchStr, $r->verbatimVernacularName)){
+                $returnArr[] = $r->ethdid;
+            }
+        }
+        return $returnArr;
+    }
+
     public function getLevenshteinMatchArr($matchStr,$minDistance){
         $returnArr = array();
         $dataArr = array();
-        $sql = 'SELECT ethdid, verbatimVernacularName '.
-            'FROM ethnodata AS d LEFT JOIN omoccurrences AS o ON d.occid = o.occid ';
+        $sql = 'SELECT ethdid, verbatimVernacularName FROM ethnodata ';
         $rs = $this->conn->query($sql);
         while ($r = $rs->fetch_object()){
             $dataArr[$r->ethdid] = $r->verbatimVernacularName;
@@ -1213,7 +1286,7 @@ class EthnoDataManager {
         return $returnArr;
     }
 
-    public function getDataRecordTidStr($id){
+    public function getDataRecordTid($id){
         $tid = 0;
         $sql = 'SELECT DISTINCT IFNULL(d.tid,o.tidinterpreted) AS tid '.
             'FROM ethnodata AS d LEFT JOIN omoccurrences AS o ON d.occid = o.occid '.
@@ -1223,6 +1296,35 @@ class EthnoDataManager {
             $tid = $r->tid;
         }
         return $tid;
+    }
+
+    public function getGenusTid($tid){
+        $returnTid = 0;
+        $sql = 'SELECT t.RankId, t2.TID '.
+            'FROM taxa AS t LEFT JOIN taxaenumtree AS te ON t.TID = te.tid '.
+            'LEFT JOIN taxa AS t2 ON te.parenttid = t2.TID '.
+            'WHERE t.TID = '.$tid.' AND t2.RankId = 180 ';
+        $rs = $this->conn->query($sql);
+        while ($r = $rs->fetch_object()){
+            if($r->RankId >= 180){
+                $returnTid = $tid;
+            }
+            else{
+                $returnTid = $r->TID;
+            }
+        }
+        return $returnTid;
+    }
+
+    public function getChildTidArr($tid){
+        $returnArr = array();
+        $sql = 'SELECT DISTINCT tid FROM taxaenumtree WHERE parenttid = '.$tid.' ';
+        $rs = $this->conn->query($sql);
+        while ($r = $rs->fetch_object()){
+            $returnArr[] = $r->tid;
+        }
+        $returnArr[] = $tid;
+        return $returnArr;
     }
 
     public function getVernacularNameList($name){

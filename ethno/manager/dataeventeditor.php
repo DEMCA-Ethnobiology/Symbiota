@@ -87,6 +87,10 @@ if($occId){
 else{
     $ethnoDataArr = $ethnoDataManager->getDataArr();
 }
+if(!$occId && $dataEventDetailArr['occid']){
+    $ethnoDataManager->setOccId($dataEventDetailArr['occid']);
+    $occidStr = $ethnoDataManager->getOccTextStr(false);
+}
 ?>
 <html>
 <head>
@@ -409,6 +413,11 @@ if($occId){
     <h2><?php echo $ethnoProjectManager->getCollectionName(); ?></h2>
     <?php
     if($eventId){
+        if($dataEventDetailArr['occid']){
+            echo '<div style="margin-left:15px;margin-bottom:10px;color:blue;font-weight:bold;">';
+            echo 'Collection record: '.$occidStr;
+            echo '</div>';
+        }
         ?>
         <div id="tabs" style="margin:0px;">
             <ul>

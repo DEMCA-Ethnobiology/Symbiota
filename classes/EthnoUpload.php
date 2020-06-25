@@ -169,7 +169,7 @@ class EthnoUpload{
                 if($field === 'consultantname'){
                     $index = array_search($csvField, array_keys($fieldMap), true);
                     $consultantName = $this->cleanInStr($recordArr[$index]);
-                    $consultantId = array_key_exists($consultantName,$consultantArr)?$consultantArr[$consultantName]:0;
+                    $consultantId = array_key_exists($consultantName,$consultantArr)?$consultantArr[$consultantName]['id']:0;
                     if(!$consultantId){
                         $this->outputMsg('ERROR: Consultant '.$consultantName.' is not associated with this project.');
                     }
@@ -247,26 +247,31 @@ class EthnoUpload{
                     $useDiscussion = $this->cleanInStr($recordArr[$index]);
                 }
             }
-            if($consultantName || $recordNumber || $refpages || $verbatimVernacularName || $annotatedVernacularName || $verbatimLanguage || $languageGlottologId || $otherVerbatimVernacularName || $otherLanguageGlottologId || $verbatimParse || $annotatedParse || $verbatimGloss || $annotatedGloss || $typology || $translation || $taxonomicDescription || $nameDiscussion || $consultantComments || $useDiscussion){
-                $sql = 'INSERT INTO uploadethnodata(collid,consultantName,recordNumber,refpages,verbatimVernacularName,annotatedVernacularName,verbatimLanguage,languageGlottologId,otherVerbatimVernacularName,otherLanguageGlottologId,verbatimParse,annotatedParse,verbatimGloss,annotatedGloss,typology,`translation`,taxonomicDescription,nameDiscussion,consultantComments,useDiscussion,ethPerID) ';
-                $sql .= 'VALUES ('.$this->collId.','.($consultantName?'"'.$consultantName.'"':'null').','.($recordNumber?'"'.$recordNumber.'"':'null').','.($refpages?'"'.$refpages.'"':'null').','.
-                    ($verbatimVernacularName?'"'.$verbatimVernacularName.'"':'null').','.($annotatedVernacularName?'"'.$annotatedVernacularName.'"':'null').','.($verbatimLanguage?'"'.$verbatimLanguage.'"':'null').','.
-                    ($languageGlottologId?'"'.$languageGlottologId.'"':'null').','.($otherVerbatimVernacularName?'"'.$otherVerbatimVernacularName.'"':'null').','.($otherLanguageGlottologId?'"'.$otherLanguageGlottologId.'"':'null').','.
-                    ($verbatimParse?'"'.$verbatimParse.'"':'null').','.($annotatedParse?'"'.$annotatedParse.'"':'null').','.($verbatimGloss?'"'.$verbatimGloss.'"':'null').','.
-                    ($annotatedGloss?'"'.$annotatedGloss.'"':'null').','.($typology?'"'.$typology.'"':'null').','.($translation?'"'.$translation.'"':'null').','.
-                    ($taxonomicDescription?'"'.$taxonomicDescription.'"':'null').','.($nameDiscussion?'"'.$nameDiscussion.'"':'null').','.($consultantComments?'"'.$consultantComments.'"':'null').','.
-                    ($useDiscussion?'"'.$useDiscussion.'"':'null').','.($consultantId?$consultantId:'null').')';
-                //echo "<div>".$sql."</div>";
-                if($this->conn->query($sql)){
-                    $recordCnt++;
-                    if($recordCnt%1000 === 0){
-                        $this->outputMsg('Upload count: '.$recordCnt,1);
-                        ob_flush();
-                        flush();
-                    }
+            if($consultantId){
+                if(!$languageGlottologId){
+                    $languageGlottologId = $consultantArr[$consultantName]['langid'];
                 }
-                else{
-                    $this->outputMsg('ERROR loading data: '.$this->conn->error);
+                if($consultantName || $recordNumber || $refpages || $verbatimVernacularName || $annotatedVernacularName || $verbatimLanguage || $languageGlottologId || $otherVerbatimVernacularName || $otherLanguageGlottologId || $verbatimParse || $annotatedParse || $verbatimGloss || $annotatedGloss || $typology || $translation || $taxonomicDescription || $nameDiscussion || $consultantComments || $useDiscussion){
+                    $sql = 'INSERT INTO uploadethnodata(collid,consultantName,recordNumber,refpages,verbatimVernacularName,annotatedVernacularName,verbatimLanguage,languageGlottologId,otherVerbatimVernacularName,otherLanguageGlottologId,verbatimParse,annotatedParse,verbatimGloss,annotatedGloss,typology,`translation`,taxonomicDescription,nameDiscussion,consultantComments,useDiscussion,ethPerID) ';
+                    $sql .= 'VALUES ('.$this->collId.','.($consultantName?'"'.$consultantName.'"':'null').','.($recordNumber?'"'.$recordNumber.'"':'null').','.($refpages?'"'.$refpages.'"':'null').','.
+                        ($verbatimVernacularName?'"'.$verbatimVernacularName.'"':'null').','.($annotatedVernacularName?'"'.$annotatedVernacularName.'"':'null').','.($verbatimLanguage?'"'.$verbatimLanguage.'"':'null').','.
+                        ($languageGlottologId?'"'.$languageGlottologId.'"':'null').','.($otherVerbatimVernacularName?'"'.$otherVerbatimVernacularName.'"':'null').','.($otherLanguageGlottologId?'"'.$otherLanguageGlottologId.'"':'null').','.
+                        ($verbatimParse?'"'.$verbatimParse.'"':'null').','.($annotatedParse?'"'.$annotatedParse.'"':'null').','.($verbatimGloss?'"'.$verbatimGloss.'"':'null').','.
+                        ($annotatedGloss?'"'.$annotatedGloss.'"':'null').','.($typology?'"'.$typology.'"':'null').','.($translation?'"'.$translation.'"':'null').','.
+                        ($taxonomicDescription?'"'.$taxonomicDescription.'"':'null').','.($nameDiscussion?'"'.$nameDiscussion.'"':'null').','.($consultantComments?'"'.$consultantComments.'"':'null').','.
+                        ($useDiscussion?'"'.$useDiscussion.'"':'null').','.($consultantId?$consultantId:'null').')';
+                    //echo "<div>".$sql."</div>";
+                    if($this->conn->query($sql)){
+                        $recordCnt++;
+                        if($recordCnt%1000 === 0){
+                            $this->outputMsg('Upload count: '.$recordCnt,1);
+                            ob_flush();
+                            flush();
+                        }
+                    }
+                    else{
+                        $this->outputMsg('ERROR loading data: '.$this->conn->error);
+                    }
                 }
             }
             $id++;
@@ -591,12 +596,13 @@ class EthnoUpload{
 
     private function getConsultantArr(){
         $returnArr = array();
-	    $sql = 'SELECT DISTINCT p.ethPerID, CONCAT_WS(" ",p.title,p.firstname,p.lastname) AS fullName '.
+	    $sql = 'SELECT DISTINCT p.ethPerID, CONCAT_WS(" ",p.title,p.firstname,p.lastname) AS fullName, l.targetLanguage '.
             'FROM ethnocollperlink AS l LEFT JOIN ethnopersonnel AS p ON l.perID = p.ethPerID '.
             'WHERE l.collID = '.$this->collId.' ';
         $rs = $this->conn->query($sql);
         while($r = $rs->fetch_object()){
-            $returnArr[$r->fullName] = $r->ethPerID;
+            $returnArr[$r->fullName]['id'] = $r->ethPerID;
+            $returnArr[$r->fullName]['langid'] = $r->targetLanguage;
         }
         $rs->free();
 

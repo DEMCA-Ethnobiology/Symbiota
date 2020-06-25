@@ -20,17 +20,24 @@ $csMode = array_key_exists('csmode',$_REQUEST)?$_REQUEST['csmode']:0;
 $tabIndex = array_key_exists("tabtarget",$_REQUEST)?$_REQUEST["tabtarget"]:0;
 $action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
 
+$genusMatch = array_key_exists("genusMatch",$_REQUEST);
 $scinameMatch = array_key_exists("scinameMatch",$_REQUEST);
 $semanticMatch = array_key_exists("semanticMatch",$_REQUEST);
 $levenshteinMatch = array_key_exists("levenshteinMatch",$_REQUEST);
 $levenshteinValue = array_key_exists('levenshteinValue',$_REQUEST)?$_REQUEST['levenshteinValue']:0;
-$vernacularNameMatch = array_key_exists("vernacularNameMatch",$_REQUEST);
+$vernacularDiffLang = array_key_exists("vernacularDiffLang",$_REQUEST);
+$vernacularStringMatch = array_key_exists("vernacularStringMatch",$_REQUEST);
+$vernacularStringMatchValue = array_key_exists('vernacularStringMatchValue',$_REQUEST)?$_REQUEST['vernacularStringMatchValue']:'';
+$vernacularRegexMatch = array_key_exists("vernacularRegexMatch",$_REQUEST);
+$vernacularRegexMatchValue = array_key_exists('vernacularRegexMatchValue',$_REQUEST)?$_REQUEST['vernacularRegexMatchValue']:'';
 $verbatimParseMatch = array_key_exists("verbatimParseMatch",$_REQUEST);
 $verbatimParseValue = array_key_exists('verbatimParseValue',$_REQUEST)?$_REQUEST['verbatimParseValue']:'';
+$verbatimParseRegexMatch = array_key_exists("verbatimParseRegexMatch",$_REQUEST);
+$verbatimParseRegexMatchValue = array_key_exists('verbatimParseRegexMatchValue',$_REQUEST)?$_REQUEST['verbatimParseRegexMatchValue']:'';
 $verbatimGlossMatch = array_key_exists("verbatimGlossMatch",$_REQUEST);
 $verbatimGlossValue = array_key_exists('verbatimGlossValue',$_REQUEST)?$_REQUEST['verbatimGlossValue']:'';
-$stringMatch = array_key_exists("stringMatch",$_REQUEST);
-$stringMatchValue = array_key_exists('stringMatchValue',$_REQUEST)?$_REQUEST['stringMatchValue']:'';
+$verbatimGlossRegexMatch = array_key_exists("verbatimGlossRegexMatch",$_REQUEST);
+$verbatimGlossRegexMatchValue = array_key_exists('verbatimGlossRegexMatchValue',$_REQUEST)?$_REQUEST['verbatimGlossRegexMatchValue']:'';
 
 //Sanitation
 if($action && !preg_match('/^[a-zA-Z0-9\s_]+$/',$action)) {
@@ -44,6 +51,7 @@ if(!is_numeric($tabIndex)) {
 }
 
 $linkageSearchReturnArr = array();
+$occidStr = '';
 
 if($action === 'Edit Data Record'){
     $ethnoDataManager->saveDataRecordChanges($_POST);
@@ -77,6 +85,10 @@ $personelArr = $dataArr["personnelArr"];
 $nameSemanticsArr = $dataArr["semanticTags"];
 $useUseArr = $dataArr["useTags"];
 $usePartsArr = $dataArr["partsTags"];
+if($dataArr["occid"]){
+    $ethnoDataManager->setOccId($dataArr["occid"]);
+    $occidStr = $ethnoDataManager->getOccTextStr(false);
+}
 ?>
 <html>
 <head>
@@ -371,20 +383,32 @@ $usePartsArr = $dataArr["partsTags"];
         }
 
         function verifyLinkageSearchForm(){
+            var genusMatch = document.getElementById('genusMatch').checked;
             var scinameMatch = document.getElementById('scinameMatch').checked;
             var semanticMatch = document.getElementById('semanticMatch').checked;
             var levenshteinMatch = document.getElementById('levenshteinMatch').checked;
             var levenshteinValue = document.getElementById('levenshteinValue').value;
-            var vernacularNameMatch = document.getElementById('vernacularNameMatch').checked;
+            var vernacularDiffLang = document.getElementById('vernacularDiffLang').checked;
+            var vernacularStringMatch = document.getElementById('vernacularStringMatch').checked;
+            var vernacularStringMatchValue = document.getElementById('vernacularStringMatchValue').value;
+            var vernacularRegexMatch = document.getElementById('vernacularRegexMatch').checked;
+            var vernacularRegexMatchValue = document.getElementById('vernacularRegexMatchValue').value;
             var verbatimParseMatch = document.getElementById('verbatimParseMatch').checked;
             var verbatimParseValue = document.getElementById('verbatimParseValue').value;
+            var verbatimParseRegexMatch = document.getElementById('verbatimParseRegexMatch').checked;
+            var verbatimParseRegexMatchValue = document.getElementById('verbatimParseRegexMatchValue').value;
             var verbatimGlossMatch = document.getElementById('verbatimGlossMatch').checked;
             var verbatimGlossValue = document.getElementById('verbatimGlossValue').value;
-            var stringMatch = document.getElementById('stringMatch').checked;
-            var stringMatchValue = document.getElementById('stringMatchValue').value;
+            var verbatimGlossRegexMatch = document.getElementById('verbatimGlossRegexMatch').checked;
+            var verbatimGlossRegexMatchValue = document.getElementById('verbatimGlossRegexMatchValue').value;
 
-            if(!scinameMatch && !semanticMatch && !levenshteinMatch && !vernacularNameMatch && !verbatimParseMatch && !verbatimGlossMatch && !stringMatch){
+            if(!genusMatch && !scinameMatch && !semanticMatch && !levenshteinMatch && !vernacularDiffLang && !vernacularStringMatch && !vernacularRegexMatch && !verbatimParseMatch && !verbatimParseRegexMatch && !verbatimGlossMatch && !verbatimGlossRegexMatch){
                 alert('Please select at least one criteria to search for linkages.');
+                return false;
+            }
+
+            if(genusMatch && scinameMatch){
+                alert('Matching genus and matching scientific name cannot both be selected.');
                 return false;
             }
 
@@ -398,8 +422,23 @@ $usePartsArr = $dataArr["partsTags"];
                 return false;
             }
 
+            if(vernacularStringMatch && (!vernacularStringMatchValue || vernacularStringMatchValue == "")){
+                alert('Please enter a string to search for within vernacular names.');
+                return false;
+            }
+
+            if(vernacularRegexMatch && (!vernacularRegexMatchValue || vernacularRegexMatchValue == "")){
+                alert('Please enter the regex criteria for vernacular names.');
+                return false;
+            }
+
             if(verbatimParseMatch && (!verbatimParseValue || verbatimParseValue == "")){
                 alert('Please enter a verbatim parse value.');
+                return false;
+            }
+
+            if(verbatimParseRegexMatch && (!verbatimParseRegexMatchValue || verbatimParseRegexMatchValue == "")){
+                alert('Please enter the regex criteria for the verbatim parse value.');
                 return false;
             }
 
@@ -408,8 +447,8 @@ $usePartsArr = $dataArr["partsTags"];
                 return false;
             }
 
-            if(stringMatch && (!stringMatchValue || stringMatchValue == "")){
-                alert('Please enter a search string value.');
+            if(verbatimGlossRegexMatch && (!verbatimGlossRegexMatchValue || verbatimGlossRegexMatchValue == "")){
+                alert('Please enter the regex criteria for the verbatim gloss value.');
                 return false;
             }
 
@@ -457,6 +496,13 @@ if($action === 'Find records' && !$linkageSearchReturnArr){
 ?>
 <!-- This is inner text! -->
 <div id="innertext">
+    <?php
+    if($dataArr["occid"]){
+        echo '<div style="margin-left:15px;margin-bottom:10px;color:blue;font-weight:bold;">';
+        echo 'Collection record: '.$occidStr;
+        echo '</div>';
+    }
+    ?>
     <div id="tabs" style="margin:0;">
         <ul>
             <li><a href="#detaildiv">Details</a></li>
@@ -502,6 +548,61 @@ if($action === 'Find records' && !$linkageSearchReturnArr){
                     </div>
                 </fieldset>
                 <fieldset style="margin-top:10px;padding:15px">
+                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
+                        <span style="font-size:13px;"><b>Verbatim vernacular name:</b></span>
+                        <input name="verbatimVernacularName" type="text" style="width:500px;" value="<?php echo $dataArr["verbatimVernacularName"]; ?>" />
+                    </div>
+                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
+                        <span style="font-size:13px;"><b>Verbatim parse:</b></span>
+                        <input name="verbatimParse" type="text" style="width:500px;" value="<?php echo $dataArr["verbatimParse"]; ?>" />
+                    </div>
+                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
+                        <span style="font-size:13px;"><b>Verbatim gloss:</b></span>
+                        <input name="verbatimGloss" type="text" style="width:500px;" value="<?php echo $dataArr["verbatimGloss"]; ?>" />
+                    </div>
+                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
+                        <span style="font-size:13px;"><b>Other verbatim vernacular name:</b></span>
+                        <input name="otherVerbatimVernacularName" type="text" style="width:500px;" value="<?php echo $dataArr["otherVerbatimVernacularName"]; ?>" />
+                    </div>
+                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
+                        <span style="font-size:13px;"><b>Annotated vernacular name:</b></span>
+                        <input name="annotatedVernacularName" type="text" style="width:500px;" value="<?php echo $dataArr["annotatedVernacularName"]; ?>" />
+                    </div>
+                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
+                        <span style="font-size:13px;"><b>Annotated parse:</b></span>
+                        <input name="annotatedParse" type="text" style="width:500px;" value="<?php echo $dataArr["annotatedParse"]; ?>" />
+                    </div>
+                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
+                        <span style="font-size:13px;"><b>Annotated gloss:</b></span>
+                        <input name="annotatedGloss" type="text" style="width:500px;" value="<?php echo $dataArr["annotatedGloss"]; ?>" />
+                    </div>
+                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
+                        <span style="font-size:13px;"><b>Verbatim language:</b></span>
+                        <input name="verbatimLanguage" type="text" style="width:500px;" value="<?php echo $dataArr["verbatimLanguage"]; ?>" />
+                    </div>
+                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
+                        <span style="font-size:13px;"><b>Glottolog language:</b></span>
+                        <select id="ethnoNewNameLanguage" name="languageid" style="width:500px;">
+                            <option value="">----Select Language----</option>
+                            <?php
+                            foreach($langArr as $k => $v){
+                                echo '<option value="'.$v['id'].'" '.(($dataArr["langId"]==$v['id'])?'selected':'').'>'.$v['name'].'</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
+                        <span style="font-size:13px;"><b>Free translation:</b></span>
+                        <input name="freetranslation" type="text" style="width:500px;" value="<?php echo $dataArr["translation"]; ?>" />
+                    </div>
+                    <div style="<?php echo ($dataArr['datasource']==='reference'?'display:flex;':'display:none;'); ?>clear:both;margin-top:10px;justify-content:space-between;">
+                        <span style="font-size:13px;"><b>Taxonomic description:</b></span>
+                        <textarea name="taxonomicDescription" style="width:500px;height:50px;resize:vertical;"><?php echo $dataArr["taxonomicDescription"]; ?></textarea>
+                    </div>
+                    <div id="editNameDiscussionDiv" style="<?php echo ($dataArr['datasource']==='reference'?'display:none;':'display:flex;'); ?>clear:both;margin-top:10px;justify-content:space-between;">
+                        <span style="font-size:13px;"><b>Consultant comments on name:</b></span>
+                        <textarea name="nameDiscussion" style="width:500px;height:50px;resize:vertical;"><?php echo $dataArr["nameDiscussion"]; ?></textarea>
+                    </div>
                     <div style="clear:both;margin-top:10px;">
                         <div style="cursor:pointer;font-size:13px;font-weight:bold;" onclick="toggleEthnoDiv('NameSemantic');">
                             <div id='plusButtonNameSemantic' style="display:none;align-items:center;">
@@ -534,72 +635,6 @@ if($action === 'Find records' && !$linkageSearchReturnArr){
                             }
                             ?>
                         </div>
-                    </div>
-                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
-                        <span style="font-size:13px;"><b>Verbatim vernacular name:</b></span>
-                        <input name="verbatimVernacularName" type="text" style="width:500px;" value="<?php echo $dataArr["verbatimVernacularName"]; ?>" />
-                    </div>
-                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
-                        <span style="font-size:13px;"><b>Annotated vernacular name:</b></span>
-                        <input name="annotatedVernacularName" type="text" style="width:500px;" value="<?php echo $dataArr["annotatedVernacularName"]; ?>" />
-                    </div>
-                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
-                        <span style="font-size:13px;"><b>Verbatim language:</b></span>
-                        <input name="verbatimLanguage" type="text" style="width:500px;" value="<?php echo $dataArr["verbatimLanguage"]; ?>" />
-                    </div>
-                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
-                        <span style="font-size:13px;"><b>Glottolog language:</b></span>
-                        <select id="ethnoNewNameLanguage" name="languageid" style="width:500px;">
-                            <option value="">----Select Language----</option>
-                            <?php
-                            foreach($langArr as $k => $v){
-                                echo '<option value="'.$v['id'].'" '.(($dataArr["langId"]==$v['id'])?'selected':'').'>'.$v['name'].'</option>';
-                            }
-                            ?>
-                        </select>
-                    </div>
-                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
-                        <span style="font-size:13px;"><b>Other verbatim vernacular name:</b></span>
-                        <input name="otherVerbatimVernacularName" type="text" style="width:500px;" value="<?php echo $dataArr["otherVerbatimVernacularName"]; ?>" />
-                    </div>
-                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
-                        <span style="font-size:13px;"><b>Glottolog language:</b></span>
-                        <select name="otherLangId" style="width:500px;">
-                            <option value="">----Select Language----</option>
-                            <?php
-                            foreach($langArr as $k => $v){
-                                echo '<option value="'.$v['id'].'" '.(($dataArr["otherLangId"]==$v['id'])?'selected':'').'>'.$v['name'].'</option>';
-                            }
-                            ?>
-                        </select>
-                    </div>
-                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
-                        <span style="font-size:13px;"><b>Verbatim parse:</b></span>
-                        <input name="verbatimParse" type="text" style="width:500px;" value="<?php echo $dataArr["verbatimParse"]; ?>" />
-                    </div>
-                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
-                        <span style="font-size:13px;"><b>Annotated parse:</b></span>
-                        <input name="annotatedParse" type="text" style="width:500px;" value="<?php echo $dataArr["annotatedParse"]; ?>" />
-                    </div>
-                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
-                        <span style="font-size:13px;"><b>Verbatim gloss:</b></span>
-                        <input name="verbatimGloss" type="text" style="width:500px;" value="<?php echo $dataArr["verbatimGloss"]; ?>" />
-                    </div>
-                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
-                        <span style="font-size:13px;"><b>Annotated gloss:</b></span>
-                        <input name="annotatedGloss" type="text" style="width:500px;" value="<?php echo $dataArr["annotatedGloss"]; ?>" />
-                    </div>
-                    <div style="clear:both;margin-top:10px;display:flex;justify-content:space-between;">
-                        <span style="font-size:13px;"><b>Free translation:</b></span>
-                        <input name="freetranslation" type="text" style="width:500px;" value="<?php echo $dataArr["translation"]; ?>" />
-                    </div>
-                    <div style="<?php echo ($dataArr['datasource']==='reference'?'display:flex;':'display:none;'); ?>clear:both;margin-top:10px;justify-content:space-between;">
-                        <span style="font-size:13px;"><b>Taxonomic description:</b></span>
-                        <textarea name="taxonomicDescription" style="width:500px;height:50px;resize:vertical;"><?php echo $dataArr["taxonomicDescription"]; ?></textarea>
-                    </div>
-                    <div id="editNameDiscussionDiv" style="<?php echo ($dataArr['datasource']==='reference'?'display:none;':'display:flex;'); ?>clear:both;margin-top:10px;justify-content:space-between;">
-                        <span style="font-size:13px;"><b>Consultant comments on name:</b></span>
-                        <textarea name="nameDiscussion" style="width:500px;height:50px;resize:vertical;"><?php echo $dataArr["nameDiscussion"]; ?></textarea>
                     </div>
                     <div style="clear:both;margin-top:10px;">
                         <span style="font-size:13px;"><b>Typology:</b></span>
@@ -715,32 +750,48 @@ if($action === 'Find records' && !$linkageSearchReturnArr){
                     <legend><b>Set criteria for linkage search</b></legend>
                     <form name="searchcriteriaform" method="post" action="dataeditor.php" onsubmit="return verifyLinkageSearchForm();">
                         <div style="margin:5px;">
-                            <input name="scinameMatch" id="scinameMatch" value="1" type="checkbox" <?php echo ($scinameMatch?'checked':''); ?> /> With matching scientific name
+                            <input name="genusMatch" id="genusMatch" value="1" type="checkbox" <?php echo ($genusMatch?'checked':''); ?> /> Matching genus
                         </div>
                         <div style="margin:5px;">
-                            <input name="semanticMatch" id="semanticMatch" value="1" type="checkbox" <?php echo ($semanticMatch?'checked':''); ?> /> With matching semantic tags
-                        </div>
-                        <div style="margin:3px;">
-                            <input name="levenshteinMatch" id="levenshteinMatch" value="1" type="checkbox" <?php echo ($levenshteinMatch?'checked':''); ?> /> With a levenshtein distance of
-                            <input name="levenshteinValue" id="levenshteinValue" type="text" value="<?php echo $levenshteinValue; ?>" /> or less
+                            <input name="scinameMatch" id="scinameMatch" value="1" type="checkbox" <?php echo ($scinameMatch?'checked':''); ?> /> Matching scientific name
                         </div>
                         <div style="margin:5px;">
-                            <input name="vernacularNameMatch" id="vernacularNameMatch" value="1" type="checkbox" <?php echo ($vernacularNameMatch?'checked':''); ?> /> With a matching vernacular name in a different language
+                            <input name="semanticMatch" id="semanticMatch" value="1" type="checkbox" <?php echo ($semanticMatch?'checked':''); ?> /> Matching semantic tags
                         </div>
-                        <div style="margin:3px;">
+                        <div style="margin:5px;">
+                            <input name="levenshteinMatch" id="levenshteinMatch" value="1" type="checkbox" <?php echo ($levenshteinMatch?'checked':''); ?> /> With a Levenshtein distance of
+                            <input name="levenshteinValue" id="levenshteinValue" style="width:50px;" type="text" value="<?php echo $levenshteinValue; ?>" /> or less
+                        </div>
+                        <div style="margin:5px;">
+                            <input name="vernacularDiffLang" id="vernacularDiffLang" value="1" type="checkbox" <?php echo ($vernacularDiffLang?'checked':''); ?> /> With a vernacular name in a different language
+                        </div>
+                        <div style="margin:5px;">
+                            <input name="vernacularStringMatch" id="vernacularStringMatch" value="1" type="checkbox" <?php echo ($vernacularStringMatch?'checked':''); ?> /> With a vernacular name containing the following string
+                            <input name="vernacularStringMatchValue" id="vernacularStringMatchValue" type="text" value="<?php echo $vernacularStringMatchValue; ?>" />
+                        </div>
+                        <div style="margin:5px;">
+                            <input name="vernacularRegexMatch" id="vernacularRegexMatch" value="1" type="checkbox" <?php echo ($vernacularRegexMatch?'checked':''); ?> /> With a vernacular name that meets the following regex criteria
+                            <input name="vernacularRegexMatchValue" id="vernacularRegexMatchValue" type="text" value="<?php echo $vernacularRegexMatchValue; ?>" />
+                        </div>
+                        <div style="margin:5px;">
                             <input name="verbatimParseMatch" id="verbatimParseMatch" value="1" type="checkbox" <?php echo ($verbatimParseMatch?'checked':''); ?> /> With a verbatim parse of
                             <input name="verbatimParseValue" id="verbatimParseValue" type="text" value="<?php echo ($verbatimParseMatch?$verbatimParseValue:$dataArr["verbatimParse"]); ?>" />
                         </div>
-                        <div style="margin:3px;">
+                        <div style="margin:5px;">
+                            <input name="verbatimParseRegexMatch" id="verbatimParseRegexMatch" value="1" type="checkbox" <?php echo ($verbatimParseRegexMatch?'checked':''); ?> /> With a verbatim parse that meets the following regex criteria
+                            <input name="verbatimParseRegexMatchValue" id="verbatimParseRegexMatchValue" type="text" value="<?php echo $verbatimParseRegexMatchValue; ?>" />
+                        </div>
+                        <div style="margin:5px;">
                             <input name="verbatimGlossMatch" id="verbatimGlossMatch" value="1" type="checkbox" <?php echo ($verbatimGlossMatch?'checked':''); ?> /> With a verbatim gloss of
                             <input name="verbatimGlossValue" id="verbatimGlossValue" type="text" value="<?php echo ($verbatimGlossMatch?$verbatimGlossValue:$dataArr["verbatimGloss"]); ?>" />
                         </div>
-                        <div style="margin:3px;">
-                            <input name="stringMatch" id="stringMatch" value="1" type="checkbox" <?php echo ($stringMatch?'checked':''); ?> /> Containing this string
-                            <input name="stringMatchValue" id="stringMatchValue" type="text" value="<?php echo $stringMatchValue; ?>" />
+                        <div style="margin:5px;">
+                            <input name="verbatimGlossRegexMatch" id="verbatimGlossRegexMatch" value="1" type="checkbox" <?php echo ($verbatimGlossRegexMatch?'checked':''); ?> /> With a verbatim gloss that meets the following regex criteria
+                            <input name="verbatimGlossRegexMatchValue" id="verbatimGlossRegexMatchValue" type="text" value="<?php echo $verbatimGlossRegexMatchValue; ?>" />
                         </div>
                         <div style="margin:20px;">
                             <input name="linkageVerbatimName" type="hidden" value="<?php echo $dataArr["verbatimVernacularName"]; ?>" />
+                            <input name="linkageLangId" type="hidden" value="<?php echo $dataArr["langId"]; ?>" />
                             <input name="collid" type="hidden" value="<?php echo $collId; ?>" />
                             <input name="eventid" type="hidden" value="<?php echo $eventId; ?>" />
                             <input name="dataid" type="hidden" value="<?php echo $dataId; ?>" />

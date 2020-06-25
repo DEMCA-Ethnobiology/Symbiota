@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/EthnoProjectManager.php');
+include_once($SERVER_ROOT.'/classes/ReferenceManager.php');
 
 header("Content-Type: text/html; charset=".$CHARSET);
 
@@ -16,6 +17,7 @@ if(!is_numeric($collid)) $collid = 0;
 if(!is_numeric($tabIndex)) $tabIndex = 0;
 
 $ethnoManager = new EthnoProjectManager();
+$refManager = new ReferenceManager();
 $ethnoManager->setCollid($collid);
 
 $statusStr = '';
