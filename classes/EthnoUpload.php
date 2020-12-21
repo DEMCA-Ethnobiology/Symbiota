@@ -459,23 +459,23 @@ class EthnoUpload{
                 $uetheventid = $row->etheventid;
                 $utid = $row->tid;
                 $uethPerID = $row->ethPerID;
-                $urefpages = $row->refpages;
-                $uverbatimVernacularName = $row->verbatimVernacularName;
-                $uannotatedVernacularName = $row->annotatedVernacularName;
-                $uverbatimLanguage = $row->verbatimLanguage;
+                $urefpages = $this->conn->real_escape_string($row->refpages);
+                $uverbatimVernacularName = $this->conn->real_escape_string($row->verbatimVernacularName);
+                $uannotatedVernacularName = $this->conn->real_escape_string($row->annotatedVernacularName);
+                $uverbatimLanguage = $this->conn->real_escape_string($row->verbatimLanguage);
                 $ulanguageGlottologId = $row->languageGlottologId;
-                $uotherVerbatimVernacularName = $row->otherVerbatimVernacularName;
+                $uotherVerbatimVernacularName = $this->conn->real_escape_string($row->otherVerbatimVernacularName);
                 $uotherLanguageGlottologId = $row->otherLanguageGlottologId;
-                $uverbatimParse = $row->verbatimParse;
-                $uannotatedParse = $row->annotatedParse;
-                $uverbatimGloss = $row->verbatimGloss;
-                $uannotatedGloss = $row->annotatedGloss;
+                $uverbatimParse = $this->conn->real_escape_string($row->verbatimParse);
+                $uannotatedParse = $this->conn->real_escape_string($row->annotatedParse);
+                $uverbatimGloss = $this->conn->real_escape_string($row->verbatimGloss);
+                $uannotatedGloss = $this->conn->real_escape_string($row->annotatedGloss);
                 $utypology = $row->typology;
-                $utranslation = $row->translation;
-                $utaxonomicDescription = $row->taxonomicDescription;
-                $unameDiscussion = $row->nameDiscussion;
-                $uconsultantComments = $row->consultantComments;
-                $uuseDiscussion = $row->useDiscussion;
+                $utranslation = $this->conn->real_escape_string($row->translation);
+                $utaxonomicDescription = $this->conn->real_escape_string($row->taxonomicDescription);
+                $unameDiscussion = $this->conn->real_escape_string($row->nameDiscussion);
+                $uconsultantComments = $this->conn->real_escape_string($row->consultantComments);
+                $uuseDiscussion = $this->conn->real_escape_string($row->useDiscussion);
                 if(!$uetheventid){
                     $sql = 'SELECT etheventid FROM ethnodataevent WHERE occid = '.$uoccid.' ';
                     if($rs2 = $this->conn->query($sql)){
