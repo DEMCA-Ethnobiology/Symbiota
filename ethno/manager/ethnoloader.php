@@ -125,8 +125,8 @@ if($isEditor){
 									</td>
                                     <td style='padding:2px;'>
 										<select name="tf[]" style="background:yellow">
-											<option value="">Field Unmapped</option>
-											<option value="">-------------------------</option>
+											<option value="unmapped">Field Unmapped</option>
+											<option value="unmapped">-------------------------</option>
 											<?php 
 											$selStr = '';
 											echo "<option value='unmapped' ".$selStr.'>Leave Field Unmapped</option>';
@@ -194,8 +194,8 @@ if($isEditor){
                                     </td>
                                     <td style='padding:2px;'>
                                         <select name="tf[]" style="background:yellow">
-                                            <option value="">Field Unmapped</option>
-                                            <option value="">-------------------------</option>
+                                            <option value="unmapped">Field Unmapped</option>
+                                            <option value="unmapped">-------------------------</option>
                                             <?php
                                             $selStr = '';
                                             echo "<option value='unmapped' ".$selStr.'>Leave Field Unmapped</option>';
